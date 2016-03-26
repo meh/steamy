@@ -1,7 +1,13 @@
 [package]
-name = "steamy-controller"
+name    = "steamy-controller"
 version = "0.1.0"
+
 authors = ["meh. <meh@schizofreni.co>"]
+license = "WTFPL"
+
+description = "Library to interact with the Steam controller."
+repository  = "https://github.com/meh/steamy"
+keywords    = ["input", "controller"]
 
 [dependencies]
 libusb    = "0.2"
