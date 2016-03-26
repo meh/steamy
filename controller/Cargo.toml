@@ -1,0 +1,9 @@
+[package]
+name = "steamy-controller"
+version = "0.1.0"
+authors = ["meh. <meh@schizofreni.co>"]
+
+[dependencies]
+libusb    = "0.2"
+byteorder = "0.4"
+bitflags  = "0.3"
