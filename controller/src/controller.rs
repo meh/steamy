@@ -1,5 +1,5 @@
 use std::time::Duration;
-use std::io::{self, Read, Cursor};
+use std::io::{self, Cursor};
 use byteorder::{WriteBytesExt};
 use usb;
 
@@ -86,9 +86,6 @@ impl<'a> Controller<'a> {
 			return Err(usb::Error::NotSupported.into());
 		}
 
-		let mut data  = Cursor::new(&buf[..]);
-		let     state = try!(State::parse(data.by_ref()));
-
-		return Ok(state);
+		return Ok(try!(State::parse(Cursor::new(&buf[..]))));
 	}
 }
