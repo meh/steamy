@@ -89,17 +89,6 @@ impl<'a> Controller<'a> {
 		let mut data  = Cursor::new(&buf[..]);
 		let     state = try!(State::parse(data.by_ref()));
 
-//		if data.position() as usize != buf.len() {
-//			println!("{} {}", data.position(), buf.len());
-//
-//			return Err(usb::Error::Io.into());
-//		}
-
 		return Ok(state);
 	}
-
-//	pub fn events(&mut self) -> EventIter {
-//		EventIter::new(self)
-//	}
 }
-
