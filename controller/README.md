@@ -144,19 +144,19 @@ It's an unsigned byte for the pressure applied to the trigger.
 
 ### Left Pad X
 
-It's a lttiel endian signed short.
+It's a little endian signed short.
 
 ### Left Pad Y
 
-It's a lttiel endian signed short.
+It's a little endian signed short.
 
 ### Right Pad X
 
-It's a lttiel endian signed short.
+It's a little endian signed short.
 
 ### Right Pad Y
 
-It's a lttiel endian signed short.
+It's a little endian signed short.
 
 ### Left Trigger Precise
 
