@@ -115,7 +115,6 @@ It's a 24 bit set, the values below are in big endian.
 - `0b001000000000000000000000` the B button has been pressed.
 - `0b010000000000000000000000` the X button has been pressed.
 - `0b000100000000000000000000` the Y button has been pressed.
-
 - `0b000000000000000000000010` the pad is being pressed.
 - `0b000000000000000000001000` the pad is being touched.
 - `0b000000000000000001000000` the analog has been pressed.
@@ -123,20 +122,15 @@ It's a 24 bit set, the values below are in big endian.
 - `0b000000000000010000000000` the pad left side has been pressed.
 - `0b000000000000001000000000` the pad right side has been pressed.
 - `0b000000000000000100000000` the pad up side has been pressed.
-
 - `0b000000000000000000000100` the trackpad has been pressed.
 - `0b000000000000000000010000` the trackpad has been touched.
-
 - `0b000000000001000000000000` the back button has been pressed.
 - `0b000000000010000000000000` the home button has been pressed.
 - `0b000000000100000000000000` the forward button has been pressed.
-
 - `0b000010000000000000000000` the left bumper has been pressed.
 - `0b000001000000000000000000` the right bumper has been pressed.
-
 - `0b00000001000000000000000` the left grip has been pressed.
 - `0b00000000000000000000001` the right grip has been pressed.
-
 - `0b000000100000000000000000` the left trigger has been fully pressed.
 - `0b000000010000000000000000` the right trigger has been fully pressed.
 
