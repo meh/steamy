@@ -53,13 +53,20 @@ impl<'a> Controller<'a> {
 			index:    index,
 		};
 
-		try!(controller.sensors().off());
-		try!(controller.control(Duration::from_secs(0), |mut buf| {
+		try!(controller.reset());
+
+		return Ok(controller);
+	}
+
+	fn reset(&mut self) -> Res<()> {
+		try!(self.sensors().off());
+		try!(self.control(Duration::from_secs(0), |mut buf| {
 			try!(buf.write_u8(0x81));
+
 			Ok(())
 		}));
 
-		return Ok(controller);
+		Ok(())
 	}
 
 	pub fn control<T, F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>>(&mut self, timeout: Duration, func: F) -> Res<()> {
@@ -79,6 +86,21 @@ impl<'a> Controller<'a> {
 		Sensors::new(self)
 	}
 
+	pub fn off(&mut self) -> Res<()> {
+		try!(self.control(Duration::from_secs(0), |mut buf| {
+			try!(buf.write_u8(0x9f));
+			try!(buf.write_u8(0x04));
+			try!(buf.write_u8(0x6f));
+			try!(buf.write_u8(0x66));
+			try!(buf.write_u8(0x66));
+			try!(buf.write_u8(0x21));
+
+			Ok(())
+		}));
+
+		Ok(())
+	}
+
 	pub fn state(&mut self, timeout: Duration) -> Res<State> {
 		let mut buf = [0u8; 64];
 
@@ -86,6 +108,16 @@ impl<'a> Controller<'a> {
 			return Err(usb::Error::NotSupported.into());
 		}
 
-		return Ok(try!(State::parse(Cursor::new(&buf[..]))));
+		match try!(State::parse(Cursor::new(&buf[..]))) {
+			state@State::Power(true) => {
+				try!(self.reset());
+
+				Ok(state)
+			}
+
+			state => {
+				Ok(state)
+			}
+		}
 	}
 }

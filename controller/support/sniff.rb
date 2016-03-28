@@ -11,24 +11,43 @@ HEADER = {
 	2 ... 4 => -> s {
 		s.color(255).underline
 	},
+}
 
+POWER = {
 	# sequence
-	4 ... 8 => -> s {
-		s.color(255)
+	4 ... 5 => -> s {
+		s.color(1)
+	},
+
+	# padding
+	6 ... 64 => -> s {
+		s.color(233)
 	},
 }
 
 IDLE = {
+	# sequence
+	4 ... 8 => -> s {
+		s.color(255)
+	},
+
+	# padding
 	8 ... 12 => -> s {
 		s.color(233)
 	},
 
+	# padding
 	16 ... 64 => -> s {
 		s.color(233)
 	}
 }
 
 INPUT = {
+	# sequence
+	4 ... 8 => -> s {
+		s.color(255)
+	},
+
 	# buttons
 	8 ... 11 => -> s {
 		s.color(3)
@@ -128,8 +147,8 @@ SESSION.each_line {|line|
 	line.strip!
 	next if line.empty?
 	bytes  = line.split(/\s*:\s*/)
-	header = bytes[0 ... 8]
-	body   = bytes[8 .. -1]
+	header = bytes[0 ... 4]
+	body   = bytes[4 .. -1]
 
 	header.each_with_index {|byte, n|
 		if color = HEADER.find { |(r, _)| r === n }
@@ -143,10 +162,25 @@ SESSION.each_line {|line|
 		end
 	}
 
-	# idle
-	if header[2] == '04' && header[3] == '0b'
+	case header[2] + header[3]
+	when '0301' # power
 		body.each_with_index {|byte, n|
-			n += 8
+			n += 4
+
+			if color = POWER.find { |(r, _)| r === n }
+				print color.last.(byte)
+			else
+				print byte.color(237)
+			end
+
+			if (n + 1) % 4 == 0
+				print ' '
+			end
+		}
+
+	when '040b' # idle
+		body.each_with_index {|byte, n|
+			n += 4
 
 			if color = IDLE.find { |(r, _)| r === n }
 				print color.last.(byte)
@@ -158,18 +192,27 @@ SESSION.each_line {|line|
 				print ' '
 			end
 		}
-	end
 
-	# input
-	if header[2] == '01' && header[3] == '3c'
+	when '013c' # input
 		body.each_with_index {|byte, n|
-			n += 8
+			n += 4
 
 			if color = INPUT.find { |(r, _)| r === n }
 				print color.last.(byte)
 			else
 				print byte.color(237)
 			end
+
+			if (n + 1) % 4 == 0
+				print ' '
+			end
+		}
+
+	else
+		body.each_with_index {|byte, n|
+			n += 4
+
+			print byte.color(237)
 
 			if (n + 1) % 4 == 0
 				print ' '

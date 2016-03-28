@@ -7,6 +7,8 @@ use super::Button;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum State {
+	Power(bool),
+
 	Idle {
 		sequence: u32,
 	},
@@ -58,20 +60,33 @@ impl State {
 	pub fn parse<R: Read + Seek>(mut buffer: R) -> Res<State> {
 		try!(buffer.seek(SeekFrom::Current(2)));
 		let status = try!(buffer.read_u16::<BigEndian>());
-		let sequence = try!(buffer.read_u32::<LittleEndian>());
 
 		match status {
+			0x0301 => {
+				let mode = try!(buffer.read_u8());
+
+				Ok(State::Power(match mode {
+					0x01 => false,
+					0x02 => true,
+					_    => return Err(usb::Error::InvalidParam.into()),
+				}))
+			}
+
 			0x040b => {
+				let sequence = try!(buffer.read_u32::<LittleEndian>());
+
 				Ok(State::Idle {
 					sequence: sequence,
 				})
 			}
 
 			0x013c => {
+				let sequence = try!(buffer.read_u32::<LittleEndian>());
+
 				let buttons = try!(buffer.read_u32::<BigEndian>());
-				let ltrig = buttons & 0xff;
+				let ltrig   = buttons & 0xff;
 				let buttons = buttons >> 8;
-				let rtrig = try!(buffer.read_u8());
+				let rtrig   = try!(buffer.read_u8());
 
 				try!(buffer.seek(SeekFrom::Current(3)));
 
@@ -83,8 +98,8 @@ impl State {
 				let ltrigp = try!(buffer.read_u16::<LittleEndian>());
 				let rtrigp = try!(buffer.read_u16::<LittleEndian>());
 
-				let oroll = try!(buffer.read_i16::<LittleEndian>());
-				let oyaw  = try!(buffer.read_i16::<LittleEndian>());
+				let oroll  = try!(buffer.read_i16::<LittleEndian>());
+				let oyaw   = try!(buffer.read_i16::<LittleEndian>());
 				let opitch = try!(buffer.read_i16::<LittleEndian>());
 
 				let aroll  = try!(buffer.read_i16::<LittleEndian>());
