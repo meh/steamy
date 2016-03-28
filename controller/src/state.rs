@@ -5,58 +5,93 @@ use usb;
 use super::Result as Res;
 use super::Button;
 
+/// The controller state.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum State {
+	/// The controller is powering on or off.
 	Power(bool),
 
 	Idle {
+		/// Sequence number for the state.
 		sequence: u32,
 	},
 
 	Input {
+		/// Sequence number for the state.
 		sequence: u32,
 
+		/// Button state of the controller.
 		buttons: Button,
-		trigger: Trigger,
-		pad:     Pad,
 
-		orientation:  Angles,
+		/// Trigger state of the controller.
+		trigger: Trigger,
+
+		/// Pads state.
+		pad: Pad,
+
+		/// Orientation of the controller if sensors are enabled.
+		orientation: Angles,
+
+		/// Acceleration of the controller if sensors are enabled.
 		acceleration: Angles,
 	}
 }
 
+/// The triggers of the controller.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Trigger {
-	pub left:  Precision,
+	/// The left trigger.
+	pub left: Precision,
+
+	/// The right trigger.
 	pub right: Precision,
 }
 
+/// Pressure force applied on the trigger.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Precision {
-	pub low:  f32,
+	/// Low precision.
+	pub low: f32,
+
+	/// High precision.
 	pub high: f64,
 }
 
+/// The pads of the controller.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Pad {
-	pub left:  Axis,
+	/// The left pad.
+	pub left: Axis,
+
+	/// The right pad.
 	pub right: Axis,
 }
 
+/// Axis on the pad.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Axis {
+	/// The X axis.
 	pub x: i16,
+
+	/// The Y axis.
 	pub y: i16,
 }
 
+/// 3D position of the controller.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Angles {
+	/// The pitch.
 	pub pitch: i16,
-	pub roll:  i16,
-	pub yaw:   i16,
+
+	/// The roll.
+	pub roll: i16,
+
+	/// The yaw.
+	pub yaw: i16,
 }
 
 impl State {
+	/// Parse the state from a given packet.
 	pub fn parse<R: Read + Seek>(mut buffer: R) -> Res<State> {
 		try!(buffer.seek(SeekFrom::Current(2)));
 		let status = try!(buffer.read_u16::<BigEndian>());

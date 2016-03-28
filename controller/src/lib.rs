@@ -1,3 +1,5 @@
+//! Steam controller handling library.
+
 extern crate libusb as usb;
 extern crate byteorder;
 #[macro_use] extern crate bitflags;

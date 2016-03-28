@@ -6,6 +6,7 @@ use usb;
 use super::Result as Res;
 use super::{State, Feedback, Sensors};
 
+/// The controller.
 pub struct Controller<'a> {
 	device: usb::Device<'a>,
 	handle: usb::DeviceHandle<'a>,
@@ -17,6 +18,7 @@ pub struct Controller<'a> {
 }
 
 impl<'a> Controller<'a> {
+	#[doc(hidden)]
 	pub fn new<'b>(mut device: usb::Device<'b>, mut handle: usb::DeviceHandle<'b>, product: u16, endpoint: u8, index: u16) -> Res<Controller<'b>> {
 		let mut address: Option<u8> = None;
 
@@ -69,6 +71,7 @@ impl<'a> Controller<'a> {
 		Ok(())
 	}
 
+	/// Send a raw USB control message to the controller.
 	pub fn control<T, F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>>(&mut self, timeout: Duration, func: F) -> Res<()> {
 		let mut buf = [0u8; 64];
 
@@ -78,14 +81,17 @@ impl<'a> Controller<'a> {
 		Ok(())
 	}
 
+	/// Get the feedback builder.
 	pub fn feedback<'b>(&'b mut self) -> Feedback<'b, 'a> where 'a: 'b {
 		Feedback::new(self)
 	}
 
+	/// Get the sensor manager.
 	pub fn sensors<'b>(&'b mut self) -> Sensors<'b, 'a> where 'a: 'b {
 		Sensors::new(self)
 	}
 
+	/// Turn the controller off.
 	pub fn off(&mut self) -> Res<()> {
 		try!(self.control(Duration::from_secs(0), |mut buf| {
 			try!(buf.write_u8(0x9f));
@@ -101,6 +107,7 @@ impl<'a> Controller<'a> {
 		Ok(())
 	}
 
+	/// Get the current state of the controller.
 	pub fn state(&mut self, timeout: Duration) -> Res<State> {
 		let mut buf = [0u8; 64];
 

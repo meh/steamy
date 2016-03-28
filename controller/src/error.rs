@@ -2,10 +2,16 @@ use std::io;
 use usb;
 use byteorder;
 
+/// Controller error.
 #[derive(Debug)]
 pub enum Error {
+	/// An IO error.
 	Io(io::Error),
+
+	/// An USB error.
 	Usb(usb::Error),
+
+	/// A byteorder error.
 	ByteOrder(byteorder::Error),
 }
 

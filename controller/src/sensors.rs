@@ -4,17 +4,20 @@ use byteorder::{WriteBytesExt, BigEndian};
 use super::Result as Res;
 use super::Controller;
 
+/// Controller sensors management.
 pub struct Sensors<'a, 'b: 'a> {
 	controller: &'a mut Controller<'b>,
 }
 
 impl<'a, 'b> Sensors<'a, 'b> {
+	#[doc(hidden)]
 	pub fn new(controller: &'a mut Controller<'b>) -> Sensors<'a, 'b> {
 		Sensors {
 			controller: controller,
 		}
 	}
 
+	/// Turn the sensors off.
 	pub fn off(self) -> Res<()> {
 		try!(self.controller.control(Duration::from_secs(0), |mut buf| {
 			try!(buf.write_u32::<BigEndian>(0x87153284));
@@ -30,6 +33,7 @@ impl<'a, 'b> Sensors<'a, 'b> {
 		Ok(())
 	}
 
+	/// Turn the sensors on.
 	pub fn on(self) -> Res<()> {
 		try!(self.controller.control(Duration::from_secs(0), |mut buf| {
 			try!(buf.write_u32::<BigEndian>(0x87153284));

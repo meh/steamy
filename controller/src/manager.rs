@@ -3,17 +3,20 @@ use super::Result as Res;
 use super::Controller;
 use super::{VENDOR_ID, PRODUCT_ID, ENDPOINT, INDEX};
 
+/// Controller manager.
 pub struct Manager {
 	usb: usb::Context,
 }
 
 impl Manager {
+	/// Create a new controller manager.
 	pub fn new() -> Res<Manager> {
 		Ok(Manager {
 			usb: try!(usb::Context::new()),
 		})
 	}
 
+	/// Open a controller.
 	pub fn open(&mut self) -> Res<Controller> {
 		let devices = try!(self.usb.devices());
 

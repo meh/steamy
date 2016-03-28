@@ -4,6 +4,7 @@ use byteorder::{WriteBytesExt, LittleEndian};
 use super::Result as Res;
 use super::Controller;
 
+/// Controller feedback builder.
 pub struct Feedback<'a, 'b: 'a> {
 	controller: &'a mut Controller<'b>,
 	side:       u8,
@@ -13,6 +14,7 @@ pub struct Feedback<'a, 'b: 'a> {
 }
 
 impl<'a, 'b> Feedback<'a, 'b> {
+	#[doc(hidden)]
 	pub fn new(controller: &'a mut Controller<'b>) -> Feedback<'a, 'b> {
 		Feedback {
 			controller: controller,
@@ -23,31 +25,37 @@ impl<'a, 'b> Feedback<'a, 'b> {
 		}
 	}
 
+	/// Send the feedback on the left pad.
 	pub fn left(mut self) -> Self {
 		self.side = 1;
 		self
 	}
 
+	/// Send the feedback on the right pad.
 	pub fn right(mut self) -> Self {
 		self.side = 0;
 		self
 	}
 
+	/// The amplitude of the feedback.
 	pub fn amplitude(mut self, value: u16) -> Self {
 		self.amplitude = value;
 		self
 	}
 
+	/// The period of the feedback.
 	pub fn period(mut self, value: u16) -> Self {
 		self.period = value;
 		self
 	}
 
+	/// The number of feedbacks to send.
 	pub fn count(mut self, value: u16) -> Self {
 		self.count = value;
 		self
 	}
 
+	/// Send the built feedback.
 	pub fn send(self) -> Res<()> {
 		let side      = self.side;
 		let amplitude = self.amplitude;
