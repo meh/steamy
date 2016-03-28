@@ -7,7 +7,7 @@ license = "WTFPL"
 
 description = "Library to interact with the Steam controller."
 repository  = "https://github.com/meh/steamy"
-keywords    = ["input", "controller"]
+keywords    = ["steam", "input", "controller"]
 
 [dependencies]
 libusb    = "0.2"
