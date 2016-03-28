@@ -5,3 +5,7 @@ authors = ["meh. <meh@schizofreni.co>"]
 
 [dependencies.steamy-controller]
 path = "controller"
+
+[[bin]]
+name = "steamy-dump"
+path = "src/bin/dump.rs"

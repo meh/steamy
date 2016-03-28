@@ -6,8 +6,9 @@ use std::env;
 fn main() {
 	let mut manager    = controller::Manager::new().unwrap();
 	let mut controller = manager.open().unwrap();
+	let sensors        = env::var("SENSORS").unwrap_or(String::from("off")) == "on";
 
-	if env::var("SENSORS").is_ok() {
+	if sensors {
 		controller.sensors().on().unwrap();
 	}
 
@@ -26,6 +27,19 @@ fn main() {
 
 				println!("}}");
 				println!("");
+			}
+
+			controller::State::Power(state) => {
+				if state {
+					println!("-- ON --");
+
+					if sensors {
+						controller.sensors().on().unwrap();
+					}
+				}
+				else {
+					println!("-- OFF --");
+				}
 			}
 
 			_ => ()
