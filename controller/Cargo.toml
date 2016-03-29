@@ -10,6 +10,8 @@ repository  = "https://github.com/meh/steamy"
 keywords    = ["steam", "input", "controller"]
 
 [dependencies]
-libusb    = "0.2"
 byteorder = "0.4"
 bitflags  = "0.3"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libusb = "0.2"
