@@ -139,37 +139,32 @@ impl<'a> Controller<'a> {
 		Ok(())
 	}
 
-	/// Get the current state of the controller.
+	/// Read the raw state of the controller.
 	#[cfg(target_os = "linux")]
-	pub fn state(&mut self, timeout: Duration) -> Res<State> {
+	pub fn raw(&mut self, timeout: Duration) -> Res<[u8; 64]> {
 		let mut buf = [0u8; 64];
 
 		if try!(self.handle.read_interrupt(self.address, &mut buf, timeout)) != buf.len() {
 			return Err(Error::InvalidParameter);
 		}
 
-		match try!(State::parse(Cursor::new(&buf[..]))) {
-			state@State::Power(true) => {
-				try!(self.reset());
-
-				Ok(state)
-			}
-
-			state => {
-				Ok(state)
-			}
-		}
+		Ok(buf)
 	}
 
 	#[cfg(not(target_os = "linux"))]
-	pub fn state(&mut self, timeout: Duration) -> Res<State> {
-		let mut buf = [0u8; 65];
+	pub fn raw(&mut self, timeout: Duration) -> Res<[u8; 64]> {
+		let mut buf = [0u8; 64];
 
-		if try!(self.handle.data().read_direct(&mut buf[..], timeout)).unwrap_or(0) != buf.len() - 1 {
+		if try!(self.handle.data().read_direct(&mut buf[..], timeout)).unwrap_or(0) != buf.len() {
 			return Err(Error::InvalidParameter);
 		}
 
-		match try!(State::parse(Cursor::new(&buf[..]))) {
+		Ok(buf)
+	}
+
+	/// Get the current state of the controller.
+	pub fn state(&mut self, timeout: Duration) -> Res<State> {
+		match try!(State::parse(Cursor::new(&try!(self.raw(timeout))[..]))) {
 			state@State::Power(true) => {
 				try!(self.reset());
 
