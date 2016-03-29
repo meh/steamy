@@ -1,4 +1,4 @@
-#[cfg(target_os = "windows")]
+#[cfg(not(target_os = "linux"))]
 use std::marker::PhantomData;
 
 use std::time::Duration;
@@ -8,7 +8,7 @@ use byteorder::{WriteBytesExt};
 #[cfg(target_os = "linux")]
 use usb;
 
-#[cfg(target_os = "windows")]
+#[cfg(not(target_os = "linux"))]
 use hid;
 
 use {Result as Res, Error, State, Feedback, Sensors};
@@ -22,7 +22,7 @@ pub struct Controller<'a> {
 	index:   u16,
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(not(target_os = "linux"))]
 pub struct Controller<'a> {
 	handle: hid::Handle,
 	marker: PhantomData<&'a ()>,
@@ -79,7 +79,7 @@ impl<'a> Controller<'a> {
 		Ok(())
 	}
 
-	#[cfg(target_os = "windows")]
+	#[cfg(not(target_os = "linux"))]
 	pub fn new<'b>(handle: hid::Handle) -> Res<Controller<'b>> {
 		let mut controller = Controller {
 			handle: handle,
@@ -102,7 +102,7 @@ impl<'a> Controller<'a> {
 		Ok(())
 	}
 
-	#[cfg(target_os = "windows")]
+	#[cfg(not(target_os = "linux"))]
 	pub fn control<T, F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>>(&mut self, func: F) -> Res<()> {
 		let mut buf = [0u8; 65];
 		buf[0] = 0x00;
@@ -161,15 +161,15 @@ impl<'a> Controller<'a> {
 		}
 	}
 
-	#[cfg(target_os = "windows")]
+	#[cfg(not(target_os = "linux"))]
 	pub fn state(&mut self, timeout: Duration) -> Res<State> {
 		let mut buf = [0u8; 65];
 
-		if try!(self.handle.data().read_direct(&mut buf, timeout)) != buf.len() {
+		if try!(self.handle.data().read_direct(&mut buf[..], timeout)).unwrap_or(0) != buf.len() - 1 {
 			return Err(Error::InvalidParameter);
 		}
 
-		match try!(State::parse(Cursor::new(&buf[1..]))) {
+		match try!(State::parse(Cursor::new(&buf[..]))) {
 			state@State::Power(true) => {
 				try!(self.reset());
 

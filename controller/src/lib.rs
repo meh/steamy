@@ -6,7 +6,7 @@ extern crate byteorder;
 #[cfg(target_os = "linux")]
 extern crate libusb as usb;
 
-#[cfg(target_os = "windows")]
+#[cfg(not(target_os = "linux"))]
 extern crate hid;
 
 const VENDOR_ID:  u16       = 0x28de;

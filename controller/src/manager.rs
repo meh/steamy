@@ -1,7 +1,7 @@
 #[cfg(target_os = "linux")]
 use usb;
 
-#[cfg(target_os = "windows")]
+#[cfg(not(target_os = "linux"))]
 use hid;
 
 use {Result as Res, Controller};
@@ -12,7 +12,7 @@ pub struct Manager {
 	#[cfg(target_os = "linux")]
 	usb: usb::Context,
 
-	#[cfg(target_os = "windows")]
+	#[cfg(not(target_os = "linux"))]
 	hid: hid::Manager,
 }
 
@@ -25,7 +25,7 @@ impl Manager {
 		})
 	}
 
-	#[cfg(target_os = "windows")]
+	#[cfg(not(target_os = "linux"))]
 	pub fn new() -> Res<Manager> {
 		Ok(Manager {
 			hid: try!(hid::init()),
@@ -58,7 +58,7 @@ impl Manager {
 		return Err(usb::Error::NoDevice.into());
 	}
 
-	#[cfg(target_os = "windows")]
+	#[cfg(not(target_os = "linux"))]
 	pub fn open(&self) -> Res<Controller> {
 		for &product in &PRODUCT_ID {
 			for device in self.hid.find(Some(VENDOR_ID), Some(product)) {

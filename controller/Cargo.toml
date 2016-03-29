@@ -16,6 +16,6 @@ bitflags  = "0.3"
 [target.'cfg(target_os = "linux")'.dependencies.libusb]
 version = "0.2"
 
-[target.'cfg(target_os = "windows")'.dependencies.hid]
+[target.'cfg(not(target_os = "linux"))'.dependencies.hid]
 version  = "0.1"
 features = ["build"]

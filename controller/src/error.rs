@@ -4,7 +4,7 @@ use byteorder;
 #[cfg(target_os = "linux")]
 use usb;
 
-#[cfg(target_os = "window")]
+#[cfg(not(target_os = "linux"))]
 use hid as usb;
 
 /// Controller error.
