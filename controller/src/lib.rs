@@ -1,8 +1,13 @@
 //! Steam controller handling library.
 
-extern crate libusb as usb;
 extern crate byteorder;
 #[macro_use] extern crate bitflags;
+
+#[cfg(target_os = "linux")]
+extern crate libusb as usb;
+
+#[cfg(target_os = "windows")]
+extern crate hid;
 
 const VENDOR_ID:  u16       = 0x28de;
 const PRODUCT_ID: [u16;  2] = [0x1102, 0x1142];

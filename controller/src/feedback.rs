@@ -1,8 +1,5 @@
-use std::time::Duration;
 use byteorder::{WriteBytesExt, LittleEndian};
-
-use super::Result as Res;
-use super::Controller;
+use {Result as Res, Controller};
 
 /// Controller feedback builder.
 pub struct Feedback<'a, 'b: 'a> {
@@ -62,7 +59,7 @@ impl<'a, 'b> Feedback<'a, 'b> {
 		let period    = self.period;
 		let count     = self.count;
 
-		try!(self.controller.control(Duration::from_secs(0), |mut buf| {
+		try!(self.controller.control(|mut buf| {
 			try!(buf.write_u8(0x8f));
 			try!(buf.write_u8(0x08));
 			try!(buf.write_u8(side));

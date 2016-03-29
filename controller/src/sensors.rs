@@ -1,8 +1,5 @@
-use std::time::Duration;
 use byteorder::{WriteBytesExt, BigEndian};
-
-use super::Result as Res;
-use super::Controller;
+use {Result as Res, Controller};
 
 /// Controller sensors management.
 pub struct Sensors<'a, 'b: 'a> {
@@ -19,7 +16,7 @@ impl<'a, 'b> Sensors<'a, 'b> {
 
 	/// Turn the sensors off.
 	pub fn off(self) -> Res<()> {
-		try!(self.controller.control(Duration::from_secs(0), |mut buf| {
+		try!(self.controller.control(|mut buf| {
 			try!(buf.write_u32::<BigEndian>(0x87153284));
 			try!(buf.write_u32::<BigEndian>(0x03180000));
 			try!(buf.write_u32::<BigEndian>(0x31020008));
@@ -35,7 +32,7 @@ impl<'a, 'b> Sensors<'a, 'b> {
 
 	/// Turn the sensors on.
 	pub fn on(self) -> Res<()> {
-		try!(self.controller.control(Duration::from_secs(0), |mut buf| {
+		try!(self.controller.control(|mut buf| {
 			try!(buf.write_u32::<BigEndian>(0x87153284));
 			try!(buf.write_u32::<BigEndian>(0x03180000));
 			try!(buf.write_u32::<BigEndian>(0x31020008));

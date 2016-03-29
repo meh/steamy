@@ -1,9 +1,7 @@
 use std::io::{Read, Seek, SeekFrom};
 use byteorder::{ReadBytesExt, BigEndian, LittleEndian};
-use usb;
 
-use super::Result as Res;
-use super::Button;
+use {Result as Res, Error, Button};
 
 /// The controller state.
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -103,7 +101,7 @@ impl State {
 				Ok(State::Power(match mode {
 					0x01 => false,
 					0x02 => true,
-					_    => return Err(usb::Error::InvalidParam.into()),
+					_    => return Err(Error::InvalidParameter),
 				}))
 			}
 
@@ -144,7 +142,7 @@ impl State {
 				Ok(State::Input {
 					sequence: sequence,
 
-					buttons: try!(Button::from_bits(buttons).ok_or(usb::Error::InvalidParam)),
+					buttons: try!(Button::from_bits(buttons).ok_or(Error::InvalidParameter)),
 
 					trigger: Trigger {
 						left: Precision {
@@ -185,7 +183,7 @@ impl State {
 			}
 
 			_ =>
-				Err(usb::Error::InvalidParam.into())
+				Err(Error::InvalidParameter)
 		}
 	}
 }

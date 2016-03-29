@@ -1,6 +1,11 @@
 use std::io;
-use usb;
 use byteorder;
+
+#[cfg(target_os = "linux")]
+use usb;
+
+#[cfg(target_os = "window")]
+use hid as usb;
 
 /// Controller error.
 #[derive(Debug)]
@@ -13,6 +18,12 @@ pub enum Error {
 
 	/// A byteorder error.
 	ByteOrder(byteorder::Error),
+
+	/// Invalid parameter.
+	InvalidParameter,
+
+	/// Not supported.
+	NotSupported,
 }
 
 impl From<io::Error> for Error {

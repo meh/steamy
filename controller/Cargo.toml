@@ -13,5 +13,9 @@ keywords    = ["steam", "input", "controller"]
 byteorder = "0.4"
 bitflags  = "0.3"
 
-[target.'cfg(target_os = "linux")'.dependencies]
-libusb = "0.2"
+[target.'cfg(target_os = "linux")'.dependencies.libusb]
+version = "0.2"
+
+[target.'cfg(target_os = "windows")'.dependencies.hid]
+version  = "0.1"
+features = ["build"]
