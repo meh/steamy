@@ -35,24 +35,14 @@ pub enum State {
 	}
 }
 
-/// The triggers of the controller.
+/// The pressure on the triggers of the controller.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Trigger {
 	/// The left trigger.
-	pub left: Precision,
+	pub left: f32,
 
 	/// The right trigger.
-	pub right: Precision,
-}
-
-/// Pressure force applied on the trigger.
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub struct Precision {
-	/// Low precision.
-	pub low: f32,
-
-	/// High precision.
-	pub high: f64,
+	pub right: f32,
 }
 
 /// The pads of the controller.
@@ -128,8 +118,7 @@ impl State {
 				let rpad_x = try!(buffer.read_i16::<LittleEndian>());
 				let rpad_y = try!(buffer.read_i16::<LittleEndian>());
 
-				let ltrigp = try!(buffer.read_u16::<LittleEndian>());
-				let rtrigp = try!(buffer.read_u16::<LittleEndian>());
+				try!(buffer.seek(SeekFrom::Current(4)));
 
 				let oroll  = try!(buffer.read_i16::<LittleEndian>());
 				let oyaw   = try!(buffer.read_i16::<LittleEndian>());
@@ -145,15 +134,8 @@ impl State {
 					buttons: try!(Button::from_bits(buttons).ok_or(Error::InvalidParameter)),
 
 					trigger: Trigger {
-						left: Precision {
-							low: ltrig as f32 / 255.0,
-							high: ltrigp as f64 / 32767.0,
-						},
-
-						right: Precision {
-							low: rtrig as f32 / 255.0,
-							high: rtrigp as f64 / 32767.0,
-						}
+						left:  ltrig as f32 / 255.0,
+						right: rtrig as f32 / 255.0,
 					},
 
 					pad: Pad {
