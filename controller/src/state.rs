@@ -118,15 +118,15 @@ impl State {
 				let rpad_x = try!(buffer.read_i16::<LittleEndian>());
 				let rpad_y = try!(buffer.read_i16::<LittleEndian>());
 
-				try!(buffer.seek(SeekFrom::Current(4)));
+				try!(buffer.seek(SeekFrom::Current(10)));
 
-				let oroll  = try!(buffer.read_i16::<LittleEndian>());
-				let oyaw   = try!(buffer.read_i16::<LittleEndian>());
-				let opitch = try!(buffer.read_i16::<LittleEndian>());
-
-				let aroll  = try!(buffer.read_i16::<LittleEndian>());
-				let ayaw   = try!(buffer.read_i16::<LittleEndian>());
 				let apitch = try!(buffer.read_i16::<LittleEndian>());
+				let ayaw   = try!(buffer.read_i16::<LittleEndian>());
+				let aroll  = try!(buffer.read_i16::<LittleEndian>());
+
+				let opitch = try!(buffer.read_i16::<LittleEndian>());
+				let oyaw   = try!(buffer.read_i16::<LittleEndian>());
+				let oroll  = try!(buffer.read_i16::<LittleEndian>());
 
 				Ok(State::Input {
 					sequence: sequence,
