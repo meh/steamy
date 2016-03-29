@@ -1,0 +1,13 @@
+[package]
+name    = "steamy-vdf"
+version = "0.1.0"
+
+authors = ["meh. <meh@schizofreni.co>"]
+license = "WTFPL"
+
+description = "VDF file format handling."
+repository  = "https://github.com/meh/steamy"
+keywords    = ["vdf", "steam", "config"]
+
+[dependencies]
+nom = "1.2"
