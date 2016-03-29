@@ -1,6 +1,7 @@
 extern crate steamy_controller as controller;
-use std::time::Duration;
+use controller::button;
 
+use std::time::Duration;
 use std::env;
 
 fn main() {
@@ -16,9 +17,18 @@ fn main() {
 		match controller.state(Duration::from_secs(0)).unwrap() {
 			controller::State::Input { sequence, buttons, trigger, pad, orientation, acceleration, .. } => {
 				println!("{} {{", sequence);
-				println!("\tbuttons: {:?}", buttons);
-				println!("\ttrigger: {:?}", trigger);
-				println!("\tpad: {:?}", pad);
+
+				if buttons.bits() != 0 {
+					println!("\tbuttons: {:?}", buttons);
+				}
+
+				if trigger.left != 0.0 || trigger.right != 0.0 {
+					println!("\ttrigger: {:?}", trigger);
+				}
+
+				if buttons.contains(button::PAD_TOUCH) || buttons.contains(button::TRACK_TOUCH) {
+					println!("\tpad: {:?}", pad);
+				}
 
 				if env::var("SENSORS").is_ok() {
 					println!("\torientation: {:?}", orientation);
