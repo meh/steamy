@@ -51,7 +51,7 @@ impl Manager {
 				
 				let handle = try!(device.open());
 
-				return Controller::new(device, handle, endpoint, index);
+				return Controller::new(device, handle, product, endpoint, index);
 			}
 		}
 
@@ -63,7 +63,7 @@ impl Manager {
 		for &product in &PRODUCT_ID {
 			for device in self.hid.find(Some(VENDOR_ID), Some(product)) {
 				if let Ok(handle) = device.open() {
-					return Controller::new(handle);
+					return Controller::new(handle, product);
 				}
 			}
 		}

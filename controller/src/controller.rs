@@ -18,20 +18,22 @@ use {Result as Res, Error, State, Feedback, Sensors};
 pub struct Controller<'a> {
 	handle: usb::DeviceHandle<'a>,
 
+	product: u16,
 	address: u8,
 	index:   u16,
 }
 
 #[cfg(not(target_os = "linux"))]
 pub struct Controller<'a> {
-	handle: hid::Handle,
-	marker: PhantomData<&'a ()>,
+	handle:  hid::Handle,
+	product: u16,
+	marker:  PhantomData<&'a ()>,
 }
 
 impl<'a> Controller<'a> {
 	#[doc(hidden)]
 	#[cfg(target_os = "linux")]
-	pub fn new<'b>(mut device: usb::Device<'b>, mut handle: usb::DeviceHandle<'b>, endpoint: u8, index: u16) -> Res<Controller<'b>> {
+	pub fn new<'b>(mut device: usb::Device<'b>, mut handle: usb::DeviceHandle<'b>, product: u16, endpoint: u8, index: u16) -> Res<Controller<'b>> {
 		let mut address: Option<u8> = None;
 
 		for i in 0 .. try!(device.device_descriptor()).num_configurations() {
@@ -89,6 +91,16 @@ impl<'a> Controller<'a> {
 		try!(controller.reset());
 
 		Ok(controller)
+	}
+
+	/// Check if the controller is remote.
+	pub fn is_remote(&self) -> bool {
+		self.product == 0x1142
+	}
+
+	/// Check if the controller is wired.
+	pub fn is_wired(&self) -> bool {
+		self.product == 0x1102
 	}
 
 	#[doc(hidden)]
