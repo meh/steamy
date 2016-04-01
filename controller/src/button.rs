@@ -64,6 +64,6 @@ bitflags! {
 		const LEFT_TRIGGER = 0b000000100000000000000000,
 
 		/// Right trigger has been fully pressed.
-		const RIGHT_TIGGER = 0b000000010000000000000000,
+		const RIGHT_TRIGGER = 0b000000010000000000000000,
 	}
 }
