@@ -10,26 +10,26 @@ macro_rules! play {
 	};
 
 	($controller:expr, $note:ident, $ms:expr) => {
-		$controller.sound().left().note(Note::$note).duration(Duration::from_millis($ms)).send().unwrap();
-		$controller.sound().right().note(Note::$note).duration(Duration::from_millis($ms)).send().unwrap();
+		$controller.sound().left().note(Note::$note).duration(Duration::from_millis($ms)).play().unwrap();
+		$controller.sound().right().note(Note::$note).duration(Duration::from_millis($ms)).play().unwrap();
 		::std::thread::sleep(Duration::from_millis($ms));
 	};
 
 	($controller:expr, $note:ident #, $ms:expr) => {
-		$controller.sound().left().note(Note::$note).sharp().duration(Duration::from_millis($ms)).send().unwrap();
-		$controller.sound().right().note(Note::$note).sharp().duration(Duration::from_millis($ms)).send().unwrap();
+		$controller.sound().left().note(Note::$note).sharp().duration(Duration::from_millis($ms)).play().unwrap();
+		$controller.sound().right().note(Note::$note).sharp().duration(Duration::from_millis($ms)).play().unwrap();
 		::std::thread::sleep(Duration::from_millis($ms));
 	};
 
 	($controller:expr, $note:ident, $oct:expr, $ms:expr) => {
-		$controller.sound().left().note(Note::$note).octave($oct).duration(Duration::from_millis($ms)).send().unwrap();
-		$controller.sound().right().note(Note::$note).octave($oct).duration(Duration::from_millis($ms)).send().unwrap();
+		$controller.sound().left().note(Note::$note).octave($oct).duration(Duration::from_millis($ms)).play().unwrap();
+		$controller.sound().right().note(Note::$note).octave($oct).duration(Duration::from_millis($ms)).play().unwrap();
 		::std::thread::sleep(Duration::from_millis($ms));
 	};
 
 	($controller:expr, $note:ident #, $oct:expr, $ms:expr) => {
-		$controller.sound().left().note(Note::$note).sharp().octave($oct).duration(Duration::from_millis($ms)).send().unwrap();
-		$controller.sound().right().note(Note::$note).sharp().octave($oct).duration(Duration::from_millis($ms)).send().unwrap();
+		$controller.sound().left().note(Note::$note).sharp().octave($oct).duration(Duration::from_millis($ms)).play().unwrap();
+		$controller.sound().right().note(Note::$note).sharp().octave($oct).duration(Duration::from_millis($ms)).play().unwrap();
 		::std::thread::sleep(Duration::from_millis($ms));
 	};
 }
