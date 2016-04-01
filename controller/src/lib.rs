@@ -31,6 +31,9 @@ pub use feedback::Feedback;
 mod sensors;
 pub use sensors::Sensors;
 
+pub mod sound;
+pub use sound::Sound;
+
 pub mod button;
 pub use button::Button;
 

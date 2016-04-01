@@ -11,7 +11,7 @@ use usb;
 #[cfg(not(target_os = "linux"))]
 use hid;
 
-use {Result as Res, Error, State, Feedback, Sensors};
+use {Result as Res, Error, State, Feedback, Sensors, Sound};
 
 /// The controller.
 #[cfg(target_os = "linux")]
@@ -61,6 +61,7 @@ impl<'a> Controller<'a> {
 
 		let mut controller = Controller {
 			handle:  handle,
+			product: product,
 			address: try!(address.ok_or(usb::Error::InvalidParam)),
 			index:   index,
 		};
@@ -133,6 +134,11 @@ impl<'a> Controller<'a> {
 	/// Get the sensor manager.
 	pub fn sensors<'b>(&'b mut self) -> Sensors<'b, 'a> where 'a: 'b {
 		Sensors::new(self)
+	}
+
+	/// Get the sound player.
+	pub fn sound<'b>(&'b mut self) -> Sound<'b, 'a> where 'a: 'b {
+		Sound::new(self)
 	}
 
 	/// Turn the controller off.
