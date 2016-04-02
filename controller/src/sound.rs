@@ -85,11 +85,11 @@ impl<'a, 'b> Sound<'a, 'b> {
 			Note::G => if self.sharp { 8 } else { 7 },
 			Note::A => if self.sharp { 10 } else { 9 },
 			Note::B => 11,
-		};
+		} + (self.octave * 12) as usize;
 
 		let channel  = self.channel;
 		let duration = self.duration;
-		let period   = 1.0 / FREQUENCIES[(index + (self.octave * 12)) as usize];
+		let period   = 1.0 / FREQUENCIES[if index >= 128 { 127 } else { index }];
 
 		try!(self.controller.control(|mut buf| {
 			try!(buf.write_u8(0x8f));
