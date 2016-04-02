@@ -71,6 +71,19 @@ impl<'a> Controller<'a> {
 		Ok(controller)
 	}
 
+	#[cfg(not(target_os = "linux"))]
+	pub fn new<'b>(handle: hid::Handle, product: u16) -> Res<Controller<'b>> {
+		let mut controller = Controller {
+			handle:  handle,
+			product: product,
+			marker:  PhantomData,
+		};
+
+		try!(controller.reset());
+
+		Ok(controller)
+	}
+
 	fn reset(&mut self) -> Res<()> {
 		try!(self.sensors().off());
 		try!(self.control(|mut buf| {
@@ -80,18 +93,6 @@ impl<'a> Controller<'a> {
 		}));
 
 		Ok(())
-	}
-
-	#[cfg(not(target_os = "linux"))]
-	pub fn new<'b>(handle: hid::Handle) -> Res<Controller<'b>> {
-		let mut controller = Controller {
-			handle: handle,
-			marker: PhantomData,
-		};
-
-		try!(controller.reset());
-
-		Ok(controller)
 	}
 
 	/// Check if the controller is remote.
