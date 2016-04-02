@@ -38,4 +38,4 @@ pub mod button;
 pub use button::Button;
 
 mod state;
-pub use state::{State, Axis, Trigger};
+pub use state::{State, Axis, Trigger, Pad, Angles};
