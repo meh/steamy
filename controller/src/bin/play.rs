@@ -49,9 +49,9 @@ impl Update for Right {
 	fn update(&mut self, buttons: controller::Button, pad: controller::Pad) {
 		self.previous = self.current;
 
-		if pad.right.x != 0 || pad.right.y != 0 {
-			let x = pad.left.x;
-			let y = pad.left.y;
+		if !pad.right.is_empty() {
+			let x = pad.right.x;
+			let y = pad.right.y;
 
 			if y < -15_000 && x > -15_000 && x < 15_000 {
 				self.current.button = Some(Button::A);
@@ -124,7 +124,7 @@ impl Update for Left {
 	fn update(&mut self, buttons: controller::Button, pad: controller::Pad) {
 		self.previous = self.current;
 
-		if pad.left.x != 0 || pad.left.y != 0 {
+		if !pad.left.is_empty() {
 			let x = pad.left.x;
 			let y = pad.left.y;
 
