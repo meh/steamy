@@ -65,6 +65,12 @@ pub struct Axis {
 	pub y: i16,
 }
 
+impl Axis {
+	pub fn is_empty(&self) -> bool {
+		self.x == 0 && self.y == 0
+	}
+}
+
 /// 3D position of the controller.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Angles {
