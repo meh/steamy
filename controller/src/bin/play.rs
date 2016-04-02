@@ -16,7 +16,7 @@ enum Button {
 #[derive(Clone, Copy, PartialEq, Debug)]
 struct State {
 	pub button:  Option<Button>,
-	pub trigger: f32,
+	pub trigger: bool,
 	pub grip:    bool,
 	pub bumper:  bool,
 	pub octave:  u8,
@@ -26,7 +26,7 @@ impl Default for State {
 	fn default() -> Self {
 		State {
 			button:  None,
-			trigger: 0.0,
+			trigger: false,
 			grip:    false,
 			bumper:  false,
 			octave:  6,
@@ -41,7 +41,7 @@ struct Right {
 }
 
 impl Right {
-	pub fn update(&mut self, buttons: controller::Button, trigger: controller::Trigger) {
+	pub fn update(&mut self, buttons: controller::Button) {
 		self.previous = self.current;
 
 		if buttons.contains(button::A) {
@@ -60,30 +60,18 @@ impl Right {
 			self.current.button = None;
 		}
 
-		if buttons.contains(button::RIGHT_GRIP) {
-			self.current.grip = true;
-		}
-		else {
-			self.current.grip = false;
-		}
-
-		if buttons.contains(button::RIGHT_BUMPER) {
-			self.current.bumper = true;
-		}
-		else {
-			self.current.bumper = false;
-		}
+		self.current.grip    = buttons.contains(button::RIGHT_GRIP);
+		self.current.bumper  = buttons.contains(button::RIGHT_BUMPER);
+		self.current.trigger = buttons.contains(button::RIGHT_TRIGGER);
 
 		if buttons.contains(button::FORWARD) {
-			if buttons.contains(button::RIGHT_GRIP) {
+			if self.current.grip {
 				self.current.octave -= 1;
 			}
 			else {
 				self.current.octave += 1;
 			}
 		}
-
-		self.current.trigger = trigger.right;
 	}
 
 	pub fn has_update(&self) -> bool {
@@ -106,7 +94,7 @@ struct Left {
 }
 
 impl Left {
-	pub fn update(&mut self, buttons: controller::Button, trigger: controller::Trigger, pad: controller::Pad) {
+	pub fn update(&mut self, buttons: controller::Button, pad: controller::Pad) {
 		self.previous = self.current;
 
 		if !buttons.contains(button::PAD_TOUCH) && (pad.left.x != 0 || pad.left.y != 0) {
@@ -133,30 +121,18 @@ impl Left {
 			self.current.button = None;
 		}
 
-		if buttons.contains(button::LEFT_GRIP) {
-			self.current.grip = true;
-		}
-		else {
-			self.current.grip = false;
-		}
-
-		if buttons.contains(button::LEFT_BUMPER) {
-			self.current.bumper = true;
-		}
-		else {
-			self.current.bumper = false;
-		}
+		self.current.grip    = buttons.contains(button::LEFT_GRIP);
+		self.current.bumper  = buttons.contains(button::LEFT_BUMPER);
+		self.current.trigger = buttons.contains(button::LEFT_TRIGGER);
 
 		if buttons.contains(button::BACK) {
-			if buttons.contains(button::LEFT_GRIP) {
+			if self.current.grip {
 				self.current.octave -= 1;
 			}
 			else {
 				self.current.octave += 1;
 			}
 		}
-
-		self.current.trigger = trigger.left;
 	}
 
 	pub fn has_update(&self) -> bool {
@@ -175,7 +151,7 @@ impl Deref for Left {
 fn build<'a, 'b>(mut builder: controller::Sound<'a, 'b>, state: &State) -> controller::Sound<'a, 'b> {
 	let button = state.button.unwrap();
 
-	if state.grip && state.trigger == 1.0 {
+	if state.grip && state.trigger {
 		builder = match button {
 			Button::A => builder.note(Note::D).octave(state.octave + 1),
 			Button::B => builder.note(Note::E).octave(state.octave + 1),
@@ -191,7 +167,7 @@ fn build<'a, 'b>(mut builder: controller::Sound<'a, 'b>, state: &State) -> contr
 			Button::D => builder.note(Note::B).octave(state.octave - 1),
 		}
 	}
-	else if state.trigger == 1.0 {
+	else if state.trigger {
 		builder = match button {
 			Button::A => builder.note(Note::G).octave(state.octave),
 			Button::B => builder.note(Note::A).octave(state.octave),
@@ -224,9 +200,9 @@ fn main() {
 
 	loop {
 		match controller.state(Duration::from_secs(0)).unwrap() {
-			controller::State::Input { buttons, trigger, pad, .. } => {
-				left.update(buttons, trigger, pad);
-				right.update(buttons, trigger);
+			controller::State::Input { buttons, pad, .. } => {
+				left.update(buttons, pad);
+				right.update(buttons);
 
 				if left.has_update() {
 					if left.button.is_some() {
