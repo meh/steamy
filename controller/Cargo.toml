@@ -17,5 +17,5 @@ bitflags  = "0.3"
 version = "0.2"
 
 [target.'cfg(not(target_os = "linux"))'.dependencies.hid]
-version  = "0.1"
+version  = "0.2"
 features = ["build"]
