@@ -18,7 +18,7 @@ fn main() {
 			controller::State::Input { sequence, buttons, trigger, pad, orientation, acceleration, .. } => {
 				println!("{} {{", sequence);
 
-				if buttons.bits() != 0 {
+				if !buttons.is_empty() {
 					println!("\tbuttons: {:?}", buttons);
 				}
 
@@ -26,7 +26,7 @@ fn main() {
 					println!("\ttrigger: {:?}", trigger);
 				}
 
-				if buttons.contains(button::PAD_TOUCH) || buttons.contains(button::TRACK_TOUCH) {
+				if !pad.right.is_empty() || !pad.left.is_empty() {
 					println!("\tpad: {:?}", pad);
 				}
 
