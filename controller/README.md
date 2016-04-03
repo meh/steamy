@@ -31,7 +31,7 @@ Power
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|     Event     |    Garbage?   |                               |
+|     Event     |                                               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
@@ -41,13 +41,6 @@ It's an unsigned char.
 
 - `0x01` means power off.
 - `0x02` means power on.
-
-### Garbage?
-
-Seems to be a monotonically increasing value after the controller has been
-turned on.
-
-Can't find a pattern in it so far.
 
 Idle
 ----
@@ -99,7 +92,7 @@ Input
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |       Orientation Pitch       |        Orientation Yaw        |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|       Orientation Roll        |                               |
+|       Orientation Roll        |          Something?           |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
@@ -181,3 +174,7 @@ It's a little endian signed short.
 ### Acceleration Pitch
 
 It's a little endian signed short.
+
+### Something?
+
+There's something, I don't know what it is tho.
