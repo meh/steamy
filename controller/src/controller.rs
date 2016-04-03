@@ -122,7 +122,7 @@ impl<'a> Controller<'a> {
 		buf[0] = 0x00;
 
 		try!(func(Cursor::new(&mut buf[1..])));
-		try!(self.handle.feature().send_direct(&buf[..]));
+		try!(self.handle.feature().send(&buf[..]));
 
 		Ok(())
 	}
@@ -174,7 +174,7 @@ impl<'a> Controller<'a> {
 	pub fn raw(&mut self, timeout: Duration) -> Res<[u8; 64]> {
 		let mut buf = [0u8; 64];
 
-		if try!(self.handle.data().read_direct(&mut buf[..], timeout)).unwrap_or(0) != buf.len() {
+		if try!(self.handle.data().read(&mut buf[..], timeout)).unwrap_or(0) != buf.len() {
 			return Err(Error::InvalidParameter);
 		}
 
