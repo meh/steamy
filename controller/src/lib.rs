@@ -1,6 +1,6 @@
 //! Steam controller handling library.
 
-extern crate byteorder;
+             extern crate byteorder;
 #[macro_use] extern crate bitflags;
 
 #[cfg(target_os = "linux")]
