@@ -122,8 +122,8 @@ It's a 24 bit set, the values below are in big endian.
 - `0b000000000100000000000000` the forward button has been pressed.
 - `0b000010000000000000000000` the left bumper has been pressed.
 - `0b000001000000000000000000` the right bumper has been pressed.
-- `0b00000001000000000000000` the left grip has been pressed.
-- `0b00000000000000000000001` the right grip has been pressed.
+- `0b000000001000000000000000` the left grip has been pressed.
+- `0b000000000000000000000001` the right grip has been pressed.
 - `0b000000100000000000000000` the left trigger has been fully pressed.
 - `0b000000010000000000000000` the right trigger has been fully pressed.
 
