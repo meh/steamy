@@ -97,7 +97,11 @@ impl State {
 				Ok(State::Power(match mode {
 					0x01 => false,
 					0x02 => true,
-					_    => return Err(Error::InvalidParameter),
+					v    => {
+						println!("invalid power state: {}", v);
+
+						return Err(Error::InvalidParameter);
+					}
 				}))
 			}
 
@@ -133,6 +137,10 @@ impl State {
 				let opitch = try!(buffer.read_i16::<LittleEndian>());
 				let oyaw   = try!(buffer.read_i16::<LittleEndian>());
 				let oroll  = try!(buffer.read_i16::<LittleEndian>());
+
+				if Button::from_bits(buttons).is_none() {
+					println!("invalid button state: {:b}", buttons);
+				}
 
 				Ok(State::Input {
 					sequence: sequence,
@@ -170,8 +178,11 @@ impl State {
 				})
 			}
 
-			_ =>
+			v => {
+				println!("invalid packet type: {}", v);
+
 				Err(Error::InvalidParameter)
+			}
 		}
 	}
 }

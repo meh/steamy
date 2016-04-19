@@ -1,0 +1,23 @@
+[package]
+name    = "support"
+version = "0.1.0"
+authors = ["meh. <meh@schizofreni.co>"]
+
+[dependencies]
+clap      = "2"
+rorschach = "0.1"
+
+[dependencies.steamy-controller]
+path = ".."
+
+[[bin]]
+name = "dump"
+
+[[bin]]
+name = "play"
+
+[[bin]]
+name = "state"
+
+[[bin]]
+name = "victory"
