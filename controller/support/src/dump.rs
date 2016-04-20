@@ -67,12 +67,20 @@ fn main() {
 		.field(Field::named("event")
 			.bytes(1))
 		.field(Field::unknown()
-			.bytes(3));
+			.bytes(3))
+		.field(Field::padding()
+			.bytes(56));
 
 	let idle = Definition::default()
 		.field(Field::named("sequence")
 			.is::<u32>(LittleEndian)
-			.style(Color::Fixed(255).normal()));
+			.style(Color::Fixed(255).normal()))
+		.field(Field::padding()
+			.bytes(4))
+		.field(Field::unknown()
+			.bytes(4))
+		.field(Field::padding()
+			.bytes(48));
 
 	let input = Definition::default()
 		.field(Field::named("sequence")
@@ -122,8 +130,8 @@ fn main() {
 		.field(Field::named("orientation.roll")
 			.is::<i16>(LittleEndian)
 			.style(Color::Fixed(129).normal()))
-		.field(Field::unknown()
-			.bytes(2));
+		.field(Field::padding()
+			.bytes(16));
 
 	let unknown = Definition::default()
 		.field(Field::unknown()
