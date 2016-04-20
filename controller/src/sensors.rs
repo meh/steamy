@@ -1,4 +1,4 @@
-use byteorder::{WriteBytesExt, BigEndian};
+use std::io::Write;
 use {Result as Res, Controller};
 
 /// Controller sensors management.
@@ -17,12 +17,14 @@ impl<'a, 'b> Sensors<'a, 'b> {
 	/// Turn the sensors off.
 	pub fn off(self) -> Res<()> {
 		try!(self.controller.control(|mut buf| {
-			try!(buf.write_u32::<BigEndian>(0x87153284));
-			try!(buf.write_u32::<BigEndian>(0x03180000));
-			try!(buf.write_u32::<BigEndian>(0x31020008));
-			try!(buf.write_u32::<BigEndian>(0x07000707));
-			try!(buf.write_u32::<BigEndian>(0x00300000));
-			try!(buf.write_u32::<BigEndian>(0x2f010000));
+			try!(buf.write(&[
+				0x87, 0x15, 0x32, 0x84,
+				0x03, 0x18, 0x00, 0x00,
+				0x31, 0x02, 0x00, 0x08,
+				0x07, 0x00, 0x07, 0x07,
+				0x00, 0x30, 0x00, 0x00,
+				0x2f, 0x01
+			][..]));
 
 			Ok(())
 		}));
@@ -33,12 +35,14 @@ impl<'a, 'b> Sensors<'a, 'b> {
 	/// Turn the sensors on.
 	pub fn on(self) -> Res<()> {
 		try!(self.controller.control(|mut buf| {
-			try!(buf.write_u32::<BigEndian>(0x87153284));
-			try!(buf.write_u32::<BigEndian>(0x03180000));
-			try!(buf.write_u32::<BigEndian>(0x31020008));
-			try!(buf.write_u32::<BigEndian>(0x07000707));
-			try!(buf.write_u32::<BigEndian>(0x00301400));
-			try!(buf.write_u32::<BigEndian>(0x2f010000));
+			try!(buf.write(&[
+				0x87, 0x15, 0x32, 0x84,
+				0x03, 0x18, 0x00, 0x00,
+				0x31, 0x02, 0x00, 0x08,
+				0x07, 0x00, 0x07, 0x07,
+				0x00, 0x30, 0x14, 0x00,
+				0x2f, 0x01
+			][..]));
 
 			Ok(())
 		}));
