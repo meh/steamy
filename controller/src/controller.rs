@@ -2,7 +2,7 @@
 use std::marker::PhantomData;
 
 use std::time::Duration;
-use std::io::{self, Cursor};
+use std::io::{self, Cursor, Write};
 use byteorder::{WriteBytesExt};
 
 #[cfg(target_os = "linux")]
@@ -145,12 +145,10 @@ impl<'a> Controller<'a> {
 	/// Turn the controller off.
 	pub fn off(&mut self) -> Res<()> {
 		try!(self.control(|mut buf| {
-			try!(buf.write_u8(0x9f));
-			try!(buf.write_u8(0x04));
-			try!(buf.write_u8(0x6f));
-			try!(buf.write_u8(0x66));
-			try!(buf.write_u8(0x66));
-			try!(buf.write_u8(0x21));
+			try!(buf.write(&[
+				0x9f, 0x04, 0x6f, 0x66,
+				0x66, 0x21
+			][..]));
 
 			Ok(())
 		}));
