@@ -11,7 +11,7 @@ use usb;
 #[cfg(not(target_os = "linux"))]
 use hid;
 
-use {Result as Res, Error, State, Feedback, Sensors, Sound};
+use {Result as Res, Error, State, Feedback, Sensors, Led, Sound};
 
 /// The controller.
 #[cfg(target_os = "linux")]
@@ -127,6 +127,11 @@ impl<'a> Controller<'a> {
 		Ok(())
 	}
 
+	/// Get the led manager.
+	pub fn led<'b>(&'b mut self) -> Led<'b, 'a> where 'a: 'b {
+		Led::new(self)
+	}
+
 	/// Get the feedback builder.
 	pub fn feedback<'b>(&'b mut self) -> Feedback<'b, 'a> where 'a: 'b {
 		Feedback::new(self)
@@ -144,16 +149,14 @@ impl<'a> Controller<'a> {
 
 	/// Turn the controller off.
 	pub fn off(&mut self) -> Res<()> {
-		try!(self.control(|mut buf| {
+		self.control(|mut buf| {
 			try!(buf.write(&[
 				0x9f, 0x04, 0x6f, 0x66,
 				0x66, 0x21
 			][..]));
 
 			Ok(())
-		}));
-
-		Ok(())
+		})
 	}
 
 	/// Read the raw state of the controller.
