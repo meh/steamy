@@ -42,6 +42,25 @@ The led intensity can be controlled.
 - `0x87 0x03 0x2d`
 - `u8` between `0` and `100`
 
+Nitification sound test
+-----------------------
+Each notification sound can be tested.
+
+- `0xb6 0x04`
+- `u8` the sound ID
+
+Notification sound change
+-------------------------
+The notification sound for turn on and turn off can be changed.
+
+- `0xc1 0x10`
+- `u8` the turn on sound ID
+- `u8` the turn off sound ID
+- `0xff 0xff 0x03 0x09`
+- `0x05 0xff 0xff 0xff`
+- `0xff 0xff 0xff 0xff`
+- `0xff 0xff`
+
 Protocol
 ========
 There's a script in `support/` to help out with reversing the protocol, the
