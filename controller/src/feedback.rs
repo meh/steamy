@@ -59,7 +59,7 @@ impl<'a, 'b> Feedback<'a, 'b> {
 		let period    = self.period;
 		let count     = self.count;
 
-		try!(self.controller.control(|mut buf| {
+		self.controller.control(|mut buf| {
 			try!(buf.write_u8(0x8f));
 			try!(buf.write_u8(0x08));
 			try!(buf.write_u8(side));
@@ -68,8 +68,6 @@ impl<'a, 'b> Feedback<'a, 'b> {
 			try!(buf.write_u16::<LittleEndian>(count));
 
 			Ok(())
-		}));
-
-		Ok(())
+		})
 	}
 }

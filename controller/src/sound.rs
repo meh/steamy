@@ -91,7 +91,7 @@ impl<'a, 'b> Sound<'a, 'b> {
 		let duration = self.duration;
 		let period   = 1.0 / FREQUENCIES[if index >= 128 { 127 } else { index }];
 
-		try!(self.controller.control(|mut buf| {
+		self.controller.control(|mut buf| {
 			try!(buf.write_u8(0x8f));
 			try!(buf.write_u8(0x07));
 			try!(buf.write_u8(channel));
@@ -107,23 +107,19 @@ impl<'a, 'b> Sound<'a, 'b> {
 			}
 
 			Ok(())
-		}));
-
-		Ok(())
+		})
 	}
 
 	/// Stop playing.
 	pub fn stop(self) -> Res<()> {
 		let channel = self.channel;
 
-		try!(self.controller.control(|mut buf| {
+		self.controller.control(|mut buf| {
 			try!(buf.write_u8(0x8f));
 			try!(buf.write_u8(0x07));
 			try!(buf.write_u8(channel));
 
 			Ok(())
-		}));
-
-		Ok(())
+		})
 	}
 }

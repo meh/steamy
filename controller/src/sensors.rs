@@ -16,7 +16,7 @@ impl<'a, 'b> Sensors<'a, 'b> {
 
 	/// Turn the sensors off.
 	pub fn off(self) -> Res<()> {
-		try!(self.controller.control(|mut buf| {
+		self.controller.control(|mut buf| {
 			try!(buf.write(&[
 				0x87, 0x15, 0x32, 0x84,
 				0x03, 0x18, 0x00, 0x00,
@@ -27,14 +27,12 @@ impl<'a, 'b> Sensors<'a, 'b> {
 			][..]));
 
 			Ok(())
-		}));
-
-		Ok(())
+		})
 	}
 
 	/// Turn the sensors on.
 	pub fn on(self) -> Res<()> {
-		try!(self.controller.control(|mut buf| {
+		self.controller.control(|mut buf| {
 			try!(buf.write(&[
 				0x87, 0x15, 0x32, 0x84,
 				0x03, 0x18, 0x00, 0x00,
@@ -45,8 +43,6 @@ impl<'a, 'b> Sensors<'a, 'b> {
 			][..]));
 
 			Ok(())
-		}));
-
-		Ok(())
+		})
 	}
 }
