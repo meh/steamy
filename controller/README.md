@@ -2,6 +2,46 @@ Steam controller handling
 =========================
 Rust library to work with the Steam controller.
 
+Control
+=======
+All control packets are 64 bytes and padded with `0x00`, all integer types are
+in little-endian.
+
+Auto-feedback
+--------------
+The auto-feedback can only be disabled.
+
+- `0x81`
+
+Feedback
+--------
+Feedbacks can be sent to either pad.
+
+- `0x8f 0x08`
+- `0x00` for right, `0x01` for left
+- `u16` for amplitude
+- `u16` for period
+- `u16` for count
+
+Sensors
+-------
+The gyroscope and accellerometer can be enabled or disabled.
+
+- `0x87 0x15 0x32 0x84`
+- `0x03 0x18 0x00 0x00`
+- `0x31 0x02 0x00 0x08`
+- `0x07 0x00 0x07 0x07`
+- `0x00 0x30`
+- `0x00` for off, `0x14` for on
+- `0x00 0x2f 0x01`
+
+Led intensity
+-------------
+The led intensity can be controlled.
+
+- `0x87 0x03 0x2d`
+- `u8` between `0` and `100`
+
 Protocol
 ========
 There's a script in `support/` to help out with reversing the protocol, the
@@ -52,8 +92,8 @@ Idle
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                                                               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|           Something?          |      0x64     |               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Something?          |      0x64     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 ### Sequence
@@ -92,8 +132,8 @@ Input
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |       Orientation Pitch       |        Orientation Yaw        |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|       Orientation Roll        |          Something?           |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|       Orientation Roll        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 ### Sequence
