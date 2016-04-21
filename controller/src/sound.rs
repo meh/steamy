@@ -43,26 +43,22 @@ impl<'a, 'b> Sound<'a, 'b> {
 	/// Test a notification sound.
 	pub fn test(self, value: u8) -> Res<()> {
 		self.controller.control(|mut buf| {
-			try!(buf.write(&[
+			buf.write(&[
 				0xb6, 0x04, value
-			][..]));
-
-			Ok(())
+			][..])
 		})
 	}
 
 	/// Change the notification sound when turning on and off the device.
 	pub fn notification(self, on: u8, off: u8) -> Res<()> {
 		self.controller.control(|mut buf| {
-			try!(buf.write(&[
+			buf.write(&[
 				0xc1, 0x10, on, off,
 				0xff, 0xff, 0x03, 0x09,
 				0x05, 0xff, 0xff, 0xff,
 				0xff, 0xff, 0xff, 0xff,
 				0xff, 0xff
-			][..]));
-
-			Ok(())
+			][..])
 		})
 	}
 

@@ -87,9 +87,7 @@ impl<'a> Controller<'a> {
 	fn reset(&mut self) -> Res<()> {
 		try!(self.sensors().off());
 		try!(self.control(|mut buf| {
-			try!(buf.write_u8(0x81));
-
-			Ok(())
+			buf.write_u8(0x81)
 		}));
 
 		Ok(())
@@ -150,12 +148,10 @@ impl<'a> Controller<'a> {
 	/// Turn the controller off.
 	pub fn off(&mut self) -> Res<()> {
 		self.control(|mut buf| {
-			try!(buf.write(&[
+			buf.write(&[
 				0x9f, 0x04, 0x6f, 0x66,
 				0x66, 0x21
-			][..]));
-
-			Ok(())
+			][..])
 		})
 	}
 
