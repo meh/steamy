@@ -117,7 +117,6 @@ impl<'a> Controller<'a> {
 	#[cfg(not(target_os = "linux"))]
 	pub fn control<T, F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>>(&mut self, func: F) -> Res<()> {
 		let mut buf = [0u8; 65];
-		buf[0] = 0x00;
 
 		try!(func(Cursor::new(&mut buf[1..])));
 		try!(self.handle.feature().send(&buf[..]));
@@ -155,9 +154,9 @@ impl<'a> Controller<'a> {
 		})
 	}
 
-	/// Read the raw state of the controller.
+	#[doc(hidden)]
 	#[cfg(target_os = "linux")]
-	pub fn raw(&mut self, timeout: Duration) -> Res<[u8; 64]> {
+	pub fn state_raw(&mut self, timeout: Duration) -> Res<[u8; 64]> {
 		let mut buf = [0u8; 64];
 
 		if try!(self.handle.read_interrupt(self.address, &mut buf, timeout)) != buf.len() {
@@ -167,8 +166,9 @@ impl<'a> Controller<'a> {
 		Ok(buf)
 	}
 
+	#[doc(hidden)]
 	#[cfg(not(target_os = "linux"))]
-	pub fn raw(&mut self, timeout: Duration) -> Res<[u8; 64]> {
+	pub fn state_raw(&mut self, timeout: Duration) -> Res<[u8; 64]> {
 		let mut buf = [0u8; 64];
 
 		if try!(self.handle.data().read(&mut buf[..], timeout)).unwrap_or(0) != buf.len() {
@@ -180,7 +180,7 @@ impl<'a> Controller<'a> {
 
 	/// Get the current state of the controller.
 	pub fn state(&mut self, timeout: Duration) -> Res<State> {
-		match try!(State::parse(Cursor::new(&try!(self.raw(timeout))[..]))) {
+		match try!(State::parse(Cursor::new(&try!(self.state_raw(timeout))[..]))) {
 			state@State::Power(true) => {
 				try!(self.reset());
 

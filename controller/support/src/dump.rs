@@ -159,7 +159,7 @@ fn main() {
 	};
 
 	loop {
-		let buffer = controller.raw(Duration::from_secs(0)).unwrap();
+		let buffer = controller.state_raw(Duration::from_secs(0)).unwrap();
 
 		match fmt {
 			Format::Structured(ref fmt) =>
