@@ -21,3 +21,6 @@ name = "state"
 
 [[bin]]
 name = "victory"
+
+[[bin]]
+name = "request"

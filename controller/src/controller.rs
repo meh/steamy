@@ -11,7 +11,26 @@ use usb;
 #[cfg(not(target_os = "linux"))]
 use hid;
 
-use {Result as Res, Error, State, Feedback, Sensors, Led, Sound};
+use {Result as Res, Error, State, Details, Feedback, Sensors, Led, Sound};
+
+macro_rules! request {
+	($limit:ident, $body:expr) => (
+		match $body {
+			Ok(v) => {
+				v
+			}
+
+			Err(e) => {
+				if $limit == 0 {
+					try!(Err(e));
+				}
+
+				$limit -= 1;
+				continue;
+			}
+		}
+	)
+}
 
 /// The controller.
 #[cfg(target_os = "linux")]
@@ -114,6 +133,7 @@ impl<'a> Controller<'a> {
 		Ok(())
 	}
 
+	#[doc(hidden)]
 	#[cfg(not(target_os = "linux"))]
 	pub fn control<T, F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>>(&mut self, func: F) -> Res<()> {
 		let mut buf = [0u8; 65];
@@ -122,6 +142,45 @@ impl<'a> Controller<'a> {
 		try!(self.handle.feature().send(&buf[..]));
 
 		Ok(())
+	}
+
+	#[doc(hidden)]
+	#[cfg(target_os = "linux")]
+	pub fn request(&mut self, id: u8, mut limit: usize) -> Res<[u8; 64]> {
+		let mut buf = [0u8; 64];
+		buf[0] = id;
+
+		loop {
+			request!(limit, self.handle.write_control(0x21, 0x09, 0x0300, self.index, &buf, Duration::from_secs(0)));
+			request!(limit, self.handle.read_control(0xa1, 0x01, 0x0300, self.index, &mut buf, Duration::from_secs(0)));
+
+			if buf[1..].iter().any(|&b| b != 0) {
+				break;
+			}
+		}
+
+		Ok(buf)
+	}
+
+	#[doc(hidden)]
+	#[cfg(not(target_os = "linux"))]
+	pub fn request(&mut self, id: u8, mut limit: usize) -> Res<[u8; 64]> {
+		let mut buf = [0u8; 65];
+		buf[1] = 0x83;
+
+		loop {
+			request!(limit, self.handle.feature().send(&buf[..]));
+			request!(limit, self.handle.feature().get(&mut buf[..]));
+
+			if buf[2..].iter().any(|&b| b != 0) {
+				break;
+			}
+		}
+
+		let mut buf_ = [0u8; 64];
+		buf_.clone_from_slice(&buf[1..]);
+
+		Ok(buf_)
 	}
 
 	/// Get the led manager.
@@ -152,6 +211,11 @@ impl<'a> Controller<'a> {
 				0x66, 0x21
 			][..])
 		})
+	}
+
+	/// Fetch the controller details.
+	pub fn details(&mut self) -> Res<Details> {
+		Details::parse(Cursor::new(&try!(self.request(0x83, 255))[..]))
 	}
 
 	#[doc(hidden)]
