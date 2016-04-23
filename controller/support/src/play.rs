@@ -285,6 +285,8 @@ fn main() {
 	let mut manager    = controller::Manager::new().unwrap();
 	let mut controller = manager.open().unwrap();
 
+	controller.led().off().unwrap();
+
 	let mut left  = Left::default();
 	let mut right = Right::default();
 
@@ -304,9 +306,11 @@ fn main() {
 
 					if left.button.is_some() {
 						build(controller.sound().left(), &left, left.octave).play().unwrap();
+						controller.led().on().unwrap();
 					}
 					else {
 						controller.sound().left().stop().unwrap();
+						controller.led().off().unwrap();
 					}
 				}
 
@@ -320,9 +324,11 @@ fn main() {
 
 					if right.button.is_some() {
 						build(controller.sound().right(), &right, right.octave).play().unwrap();
+						controller.led().on().unwrap();
 					}
 					else {
 						controller.sound().right().stop().unwrap();
+						controller.led().off().unwrap();
 					}
 				}
 			}
