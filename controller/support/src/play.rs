@@ -11,7 +11,8 @@ trait Update {
 }
 
 trait Octave {
-	fn octave(&mut self, direction: bool);
+	fn get(&self) -> u8;
+	fn set(&mut self, direction: bool);
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -53,7 +54,7 @@ struct Right {
 	previous: State,
 	current:  State,
 
-	pub octave: u8,
+	octave: u8,
 }
 
 impl Default for Right {
@@ -132,7 +133,11 @@ impl Update for Right {
 }
 
 impl Octave for Right {
-	fn octave(&mut self, direction: bool) {
+	fn get(&self) -> u8 {
+		self.octave
+	}
+
+	fn set(&mut self, direction: bool) {
 		if direction {
 			self.octave += 1;
 
@@ -163,7 +168,7 @@ struct Left {
 	previous: State,
 	current:  State,
 
-	pub octave: u8,
+	octave: u8,
 }
 
 impl Default for Left {
@@ -228,7 +233,11 @@ impl Update for Left {
 }
 
 impl Octave for Left {
-	fn octave(&mut self, direction: bool) {
+	fn get(&self) -> u8 {
+		self.octave
+	}
+
+	fn set(&mut self, direction: bool) {
 		if direction {
 			self.octave += 1;
 
@@ -254,11 +263,38 @@ impl Deref for Left {
 	}
 }
 
+fn led(state: &State) -> u8 {
+	let button = state.button.unwrap();
+	let level  = if state.trigger {
+		match button {
+			Button::A => 70,
+			Button::B => 80,
+			Button::C => 90,
+			Button::D => 100,
+		}
+	}
+	else {
+		match button {
+			Button::A => 30,
+			Button::B => 40,
+			Button::C => 50,
+			Button::D => 60,
+		}
+	};
+
+	if state.grip {
+		level + 5
+	}
+	else {
+		level
+	}
+}
+
 fn build<'a, 'b>(mut builder: controller::Sound<'a, 'b>, state: &State, octave: u8) -> controller::Sound<'a, 'b> {
 	let button = state.button.unwrap();
 
-	if state.trigger {
-		builder = match button {
+	builder = if state.trigger {
+		match button {
 			Button::A => builder.note(Note::G).octave(octave),
 			Button::B => builder.note(Note::A).octave(octave),
 			Button::C => builder.note(Note::B).octave(octave),
@@ -266,7 +302,7 @@ fn build<'a, 'b>(mut builder: controller::Sound<'a, 'b>, state: &State, octave: 
 		}
 	}
 	else {
-		builder = match button {
+		match button {
 			Button::A => builder.note(Note::C).octave(octave),
 			Button::B => builder.note(Note::D).octave(octave),
 			Button::C => builder.note(Note::E).octave(octave),
@@ -299,14 +335,14 @@ fn main() {
 				if left.has_update() {
 					match left.mode {
 						Some(Mode::Octave(octave)) =>
-							Octave::octave(&mut left, octave),
+							Octave::set(&mut left, octave),
 
 						_ => ()
 					}
 
 					if left.button.is_some() {
 						build(controller.sound().left(), &left, left.octave).play().unwrap();
-						controller.led().on().unwrap();
+						controller.led().level(led(&left)).unwrap();
 					}
 					else {
 						controller.sound().left().stop().unwrap();
@@ -317,14 +353,14 @@ fn main() {
 				if right.has_update() {
 					match right.mode {
 						Some(Mode::Octave(octave)) =>
-							Octave::octave(&mut right, octave),
+							Octave::set(&mut right, octave),
 
 						_ => ()
 					}
 
 					if right.button.is_some() {
 						build(controller.sound().right(), &right, right.octave).play().unwrap();
-						controller.led().on().unwrap();
+						controller.led().level(led(&right)).unwrap();
 					}
 					else {
 						controller.sound().right().stop().unwrap();
