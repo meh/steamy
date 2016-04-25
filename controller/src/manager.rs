@@ -62,8 +62,13 @@ impl Manager {
 	pub fn open(&self) -> Res<Controller> {
 		for &product in &PRODUCT_ID {
 			for device in self.hid.find(Some(VENDOR_ID), Some(product)) {
+				println!("{}:{}", VENDOR_ID, product);
+
 				if let Ok(handle) = device.open() {
 					return Controller::new(handle, product);
+				}
+				else {
+					println!("YOU DUN GOOFED");
 				}
 			}
 		}

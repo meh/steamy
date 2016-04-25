@@ -36,20 +36,75 @@ fn main() {
 	let buf = controller.request(id, 255).unwrap();
 
 	let def = match id {
-		0x83 =>
+		0x83 => {
 			Definition::default()
-				.field(Field::unknown()
-					.bytes(23))
-				.field(Field::named("firmware")
+				.field(Field::constant()
+					.bytes(1)
+					.value(0x83))
+				.field(Field::constant()
+					.bytes(1)
+					.value(0x23))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(1).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(1).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(2).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(2).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(3).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(3).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(4).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(4).normal()))
+				.field(Field::named("key.firmware")
+					.bytes(1)
+					.style(Color::Fixed(5).underline()))
+				.field(Field::named("value.firmware")
 					.is::<i32>(LittleEndian)
-					.style(Color::Fixed(255).normal()))
-				.field(Field::unknown()
-					.bytes(37)),
+					.style(Color::Fixed(5).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(6).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(6).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(7).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(7).normal()))
+		}
 
-		_ =>
+		0xba => {
 			Definition::default()
 				.field(Field::unknown()
 					.bytes(64))
+		}
+
+		0xab => {
+			Definition::default()
+				.field(Field::unknown()
+					.bytes(64))
+		}
+
+		_ => {
+			Definition::default()
+				.field(Field::unknown()
+					.bytes(64))
+		}
 	};
 
 	if matches.is_present("structured") {

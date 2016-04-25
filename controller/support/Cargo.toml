@@ -5,7 +5,10 @@ authors = ["meh. <meh@schizofreni.co>"]
 
 [dependencies]
 clap      = "2"
-rorschach = "0.1"
+#rorschach = "0.1"
+
+[dependencies.rorschach]
+path = "/home/meh/projects/rust/rorschach"
 
 [dependencies.steamy-controller]
 path = ".."
