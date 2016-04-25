@@ -1,5 +1,4 @@
 extern crate steamy_controller as controller;
-use controller::button;
 
 use std::time::Duration;
 use std::env;
