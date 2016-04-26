@@ -15,11 +15,13 @@ impl<'a, 'b> Lizard<'a, 'b> {
 
 	/// Enable lizard mode.
 	pub fn enable(self) -> Res<()> {
-		self.controller.control(0x85)
+		self.controller.settings().lizard = true;
+		self.controller.reset()
 	}
 
 	/// Disable lizard mode.
 	pub fn disable(self) -> Res<()> {
-		self.controller.control(0x81)
+		self.controller.settings().lizard = false;
+		self.controller.reset()
 	}
 }

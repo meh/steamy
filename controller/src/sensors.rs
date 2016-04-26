@@ -1,4 +1,3 @@
-use std::io::Write;
 use {Result as Res, Controller};
 
 /// Controller sensors management.
@@ -16,27 +15,13 @@ impl<'a, 'b> Sensors<'a, 'b> {
 
 	/// Turn the sensors off.
 	pub fn off(self) -> Res<()> {
-		self.controller.control_with(0x87, 0x15, |mut buf| {
-			buf.write(&[
-				0x32, 0x84, 0x03, 0x18,
-				0x00, 0x00, 0x31, 0x02,
-				0x00, 0x08, 0x07, 0x00,
-				0x07, 0x07, 0x00, 0x30,
-				0x00, 0x00, 0x2f, 0x01
-			][..])
-		})
+		self.controller.settings().sensors = false;
+		self.controller.reset()
 	}
 
 	/// Turn the sensors on.
 	pub fn on(self) -> Res<()> {
-		self.controller.control_with(0x87, 0x15, |mut buf| {
-			buf.write(&[
-				0x32, 0x84, 0x03, 0x18,
-				0x00, 0x00, 0x31, 0x02,
-				0x00, 0x08, 0x07, 0x00,
-				0x07, 0x07, 0x00, 0x30,
-				0x14, 0x00, 0x2f, 0x01
-			][..])
-		})
+		self.controller.settings().sensors = true;
+		self.controller.reset()
 	}
 }

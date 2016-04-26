@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 use std::time::Duration;
 use std::thread;
 use std::io::{self, Cursor, Write};
-use byteorder::{WriteBytesExt};
+use byteorder::{WriteBytesExt, LittleEndian};
 
 #[cfg(target_os = "linux")]
 use usb;
@@ -39,11 +39,30 @@ macro_rules! request {
 	)
 }
 
+#[doc(hidden)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct Settings {
+	pub timeout: u16,
+	pub sensors: bool,
+	pub lizard:  bool,
+}
+
+impl Default for Settings {
+	fn default() -> Self {
+		Settings {
+			timeout: 360,
+			sensors: false,
+			lizard:  false,
+		}
+	}
+}
+
 /// The controller.
 #[cfg(target_os = "linux")]
 pub struct Controller<'a> {
-	handle: usb::DeviceHandle<'a>,
-	packet: [u8; 64],
+	handle:   usb::DeviceHandle<'a>,
+	packet:   [u8; 64],
+	settings: Settings,
 
 	product: u16,
 	address: u8,
@@ -52,8 +71,9 @@ pub struct Controller<'a> {
 
 #[cfg(not(target_os = "linux"))]
 pub struct Controller<'a> {
-	handle: hid::Handle,
-	packet: [u8; 65],
+	handle:  hid::Handle,
+	packet:  [u8; 65],
+	settings: Settings,
 
 	product: u16,
 	marker:  PhantomData<&'a ()>,
@@ -88,26 +108,36 @@ impl<'a> Controller<'a> {
 			}
 		}
 
-		Ok(Controller {
-			handle: handle,
-			packet: [0u8; 64],
+		let mut controller = Controller {
+			handle:   handle,
+			packet:   [0u8; 64],
+			settings: Default::default(),
 
 			product: product,
 			address: try!(address.ok_or(usb::Error::InvalidParam)),
 			index:   index,
-		})
+		};
+
+		try!(controller.reset());
+
+		Ok(controller)
 	}
 
 	#[cfg(not(target_os = "linux"))]
 	pub fn new<'b>(handle: hid::Handle, product: u16) -> Res<Controller<'b>> {
-		Ok(Controller {
-			handle: handle,
-			packet: [0u8; 65],
+		let mut controller = Controller {
+			handle:   handle,
+			packet:   [0u8; 65],
+			settings: Default::default(),
 
 			product: product,
 
 			marker: PhantomData,
-		})
+		};
+
+		try!(controller.reset());
+
+		Ok(controller)
 	}
 
 	/// Check if the controller is remote.
@@ -118,6 +148,58 @@ impl<'a> Controller<'a> {
 	/// Check if the controller is wired.
 	pub fn is_wired(&self) -> bool {
 		self.product == 0x1102
+	}
+
+	/// Check if the controller is connected.
+	pub fn is_connected(&mut self) -> bool {
+		if self.is_wired() {
+			return true;
+		}
+
+		if let Ok(buf) = self.request(0xb4) {
+			buf[0] == 0x02
+		}
+		else {
+			false
+		}
+	}
+
+	#[doc(hidden)]
+	pub fn settings(&mut self) -> &mut Settings {
+		&mut self.settings
+	}
+
+	#[doc(hidden)]
+	pub fn reset(&mut self) -> Res<()> {
+		let timeout = self.settings.timeout;
+
+		if self.settings.lizard {
+			try!(self.control(0x85));
+		}
+		else {
+			try!(self.control(0x81));
+		}
+
+		if self.settings.sensors {
+			try!(self.control_with(0x87, 0x15, |mut buf| {
+				try!(buf.write_u8(0x32));
+				try!(buf.write_u16::<LittleEndian>(timeout));
+				try!(buf.write(&[0x18, 0x00, 0x00, 0x31, 0x02, 0x00, 0x08, 0x07, 0x00, 0x07, 0x07, 0x00, 0x30]));
+				try!(buf.write_u8(0x14));
+				buf.write(&[0x2f, 0x01])
+			}));
+		}
+		else {
+			try!(self.control_with(0x87, 0x15, |mut buf| {
+				try!(buf.write_u8(0x32));
+				try!(buf.write_u16::<LittleEndian>(timeout));
+				try!(buf.write(&[0x18, 0x00, 0x00, 0x31, 0x02, 0x00, 0x08, 0x07, 0x00, 0x07, 0x07, 0x00, 0x30]));
+				try!(buf.write_u8(0x00));
+				buf.write(&[0x2f, 0x01])
+			}));
+		}
+
+		Ok(())
 	}
 
 	#[doc(hidden)]
@@ -241,6 +323,12 @@ impl<'a> Controller<'a> {
 		Sound::new(self)
 	}
 
+	/// Set the idle duration before turning off.
+	pub fn timeout(&mut self, value: Duration) -> Res<()> {
+		self.settings.timeout = value.as_secs() as u16;
+		self.reset()
+	}
+
 	/// Turn the controller off.
 	pub fn off(&mut self) -> Res<()> {
 		self.control_with(0x9f, 0x04, |mut buf| {
@@ -303,8 +391,15 @@ impl<'a> Controller<'a> {
 
 	/// Get the current state of the controller.
 	pub fn state(&mut self, timeout: Duration) -> Res<State> {
-		let (id, buffer) = try!(self.receive(timeout));
+		let state = {
+			let (id, buffer) = try!(self.receive(timeout));
+			try!(State::parse(id, Cursor::new(buffer)))
+		};
 
-		State::parse(id, Cursor::new(buffer))
+		if let State::Power(true) = state {
+			try!(self.reset());
+		}
+
+		Ok(state)
 	}
 }
