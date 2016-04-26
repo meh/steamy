@@ -2,58 +2,134 @@ Steam controller handling
 =========================
 Rust library to work with the Steam controller.
 
+Request
+=======
+All requests are done with a 64 bytes HID feature send, the 1st byte
+contains the ID, the 2nd byte the size of the packet, then the payload
+and the rest is padded with `0x00`.
+
+Some requests have responses, some do not, responses have the same layout as
+requests. In the listed responses only the payload is shown.
+
+Check connection
+----------------
+When using the dongle the controller status can be checked.
+
+- `0xb4` id
+- `0x00` size
+
+### Response
+
+- `0x01` for disconnected, `0x02` for connected
+
+Build details
+-------------
+Information about the device can be fetched, it's a list of key/value pairs
+where the key is 1 byte, and the value is 4 bytes.
+
+- `0x83` id
+- `0x00` size
+
+### Keys
+
+- `0x0a` is the bootloader build date.
+- `0x04` is the controller firmware build date.
+- `0x05` is the radio firmware build date.
+
+Serial number
+-------------
+Serial numbers can be requested.
+
+- `0xae` id
+- `0x15` size
+- `0x00` for main board, `0x01` for controller
+
+### Response
+
+- `0x00`
+- `[u8; 10]` the serial number
+
+Receiver information
+--------------------
+If the controller is in wireless mode information about the receiver can be
+fetched.
+
+- `0xa1` id
+- `0x00` size
+
+### Response
+
+- `i32` firmware build date.
+- 10 bytes of ヽ(´ｰ｀ )ﾉ
+- `[u8; 10]` receiver serial number
+
 Control
 =======
-All control packets are 64 bytes and padded with `0x00`, all integer types are
-in little-endian.
+All controls are done with a 64 bytes HID feature send, the 1st byte
+contains the ID, the 2nd byte the size of the packet, then the payload
+and the rest is padded with `0x00`.
 
-Auto-feedback
---------------
-The auto-feedback can only be disabled.
+Disable lizard mode
+-------------------
+The so called lizard mode can be disabled.
 
-- `0x81`
+- `0x81` id
+- `0x00` size
+
+Enable lizard mode
+------------------
+The so called lizard mode can be enabled.
+
+- `0x85` id
+- `0x00` size
 
 Feedback
 --------
 Feedbacks can be sent to either pad.
 
-- `0x8f 0x08`
+- `0x8f` id
+- `0x08` size
 - `0x00` for right, `0x01` for left
 - `u16` for amplitude
 - `u16` for period
 - `u16` for count
 
-Sensors
--------
-The gyroscope and accellerometer can be enabled or disabled.
+Sensors and timeout
+-------------------
+The gyroscope and accellerometer can be enabled or disabled and the idle
+timeout can be changed.
 
-- `0x87 0x15 0x32 0x84`
-- `0x03 0x18 0x00 0x00`
-- `0x31 0x02 0x00 0x08`
-- `0x07 0x00 0x07 0x07`
-- `0x00 0x30`
-- `0x00` for off, `0x14` for on
-- `0x00 0x2f 0x01`
+- `0x87` id
+- `0x15` size
+- `0x32`
+- `u16` timeout
+- `0x18 0x00 0x00 0x31 0x02 0x00 0x08 0x07 0x00 0x07 0x07 0x00 0x30`
+- `0x00` to disable, `0x14` to disable
+- `0x00 0x2e`
 
 Led intensity
 -------------
 The led intensity can be controlled.
 
-- `0x87 0x03 0x2d`
-- `u8` between `0` and `100`
+- `0x87` id
+- `0x03` size
+- `0x2d`
+- `u8` between `0 .. 100`
 
-Nitification sound test
+Notification sound test
 -----------------------
 Each notification sound can be tested.
 
-- `0xb6 0x04`
+- `0xb6` id
+- `0x04` size
 - `u8` the sound ID
 
 Notification sound change
 -------------------------
 The notification sound for turn on and turn off can be changed.
 
-- `0xc1 0x10`
+- `0xc1` id
+- `0x10` size
 - `u8` the turn on sound ID
 - `u8` the turn off sound ID
 - `0xff 0xff 0x03 0x09`
@@ -72,17 +148,21 @@ Header
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|            0x0100             |            Status             |
+|            0x0100             |      Type     |      Size     |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
-### Status
+### Type
 
-It's a 16 bit flag, the values below are in big endian.
+It's a 1 byte flag.
 
-- `0x0301` means the device is sending power events.
-- `0x040b` means the device is idle.
-- `0x013c` means the device is sending input.
+- `0x01` means the device is sending input.
+- `0x03` means the device is sending power events.
+- `0x04` means the device is idle.
+
+### Size
+
+Tells the size of the packet.
 
 Power
 -----
