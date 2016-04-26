@@ -37,11 +37,17 @@ pub use led::Led;
 pub mod sound;
 pub use sound::Sound;
 
+mod calibrate;
+pub use calibrate::Calibrate;
+
+mod lizard;
+pub use lizard::Lizard;
+
 pub mod button;
 pub use button::Button;
 
 mod state;
 pub use state::{State, Axis, Trigger, Pad, Angles};
 
-mod details;
+pub mod details;
 pub use details::Details;

@@ -16,10 +16,8 @@ impl<'a, 'b> Led<'a, 'b> {
 
 	/// Change the led luminosity.
 	pub fn level(self, value: u8) -> Res<()> {
-		self.controller.control(|mut buf| {
-			buf.write(&[
-				0x87, 0x03, 0x2d, value
-			][..])
+		self.controller.control_with(0x87, 0x03, |mut buf| {
+			buf.write(&[0x2d, value])
 		})
 	}
 

@@ -33,23 +33,72 @@ fn main() {
 	let mut controller = manager.open().unwrap();
 
 	let id  = u8::from_str_radix(matches.value_of("ID").unwrap(), 16).unwrap();
-	let buf = controller.request(id, 255).unwrap();
+	let buf = controller.request(id).unwrap();
 
 	let def = match id {
-		0x83 =>
+		0x83 => {
 			Definition::default()
-				.field(Field::unknown()
-					.bytes(23))
-				.field(Field::named("firmware")
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(1).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(1).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(2).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(2).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(3).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(3).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(4).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(4).normal()))
+				.field(Field::named("key.firmware")
+					.bytes(1)
+					.style(Color::Fixed(5).underline()))
+				.field(Field::named("value.firmware")
 					.is::<i32>(LittleEndian)
-					.style(Color::Fixed(255).normal()))
-				.field(Field::unknown()
-					.bytes(37)),
+					.style(Color::Fixed(5).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(6).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(6).normal()))
+				.field(Field::named("key")
+					.bytes(1)
+					.style(Color::Fixed(7).underline()))
+				.field(Field::named("value")
+					.bytes(4)
+					.style(Color::Fixed(7).normal()))
+		}
 
-		_ =>
+		0xba => {
 			Definition::default()
 				.field(Field::unknown()
 					.bytes(64))
+		}
+
+		0xab => {
+			Definition::default()
+				.field(Field::unknown()
+					.bytes(64))
+		}
+
+		_ => {
+			Definition::default()
+				.field(Field::unknown()
+					.bytes(64))
+		}
 	};
 
 	if matches.is_present("structured") {
@@ -60,7 +109,7 @@ fn main() {
 			fmt = fmt.style(Default::default());
 		}
 
-		fmt.format(&def, &buf[..], io::stdout()).unwrap();
+		fmt.format(&def, buf, io::stdout()).unwrap();
 	}
 	else {
 		let mut fmt = formatter::Inline::default()
@@ -71,6 +120,6 @@ fn main() {
 			fmt = fmt.style(Default::default());
 		}
 
-		fmt.format(&def, &buf[..], io::stdout()).unwrap();
+		fmt.format(&def, buf, io::stdout()).unwrap();
 	}
 }

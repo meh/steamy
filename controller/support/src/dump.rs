@@ -53,23 +53,9 @@ fn main() {
 		controller.sensors().on().unwrap();
 	}
 
-	let header = Definition::default()
-		.field(Field::constant()
-			.bytes(1)
-			.value(0x01))
-		.field(Field::padding()
-			.bytes(1))
-		.field(Field::named("status")
-			.bytes(2)
-			.style(Color::Black.on(Color::Fixed(255))));
-
 	let power = Definition::default()
 		.field(Field::named("event")
-			.bytes(1))
-		.field(Field::unknown()
-			.bytes(3))
-		.field(Field::padding()
-			.bytes(56));
+			.bytes(1));
 
 	let idle = Definition::default()
 		.field(Field::named("sequence")
@@ -78,9 +64,7 @@ fn main() {
 		.field(Field::padding()
 			.bytes(4))
 		.field(Field::unknown()
-			.bytes(4))
-		.field(Field::padding()
-			.bytes(48));
+			.bytes(4));
 
 	let input = Definition::default()
 		.field(Field::named("sequence")
@@ -133,13 +117,9 @@ fn main() {
 		.field(Field::padding()
 			.bytes(16));
 
-	let unknown = Definition::default()
-		.field(Field::unknown()
-			.bytes(60));
-
 	let fmt = if matches.is_present("structured") {
 		let mut fmt = formatter::Structured::default()
-			.header(false);
+			.header(true);
 
 		if matches.is_present("colored") {
 			fmt = fmt.style(Default::default());
@@ -159,28 +139,19 @@ fn main() {
 	};
 
 	loop {
-		let buffer = controller.state_raw(Duration::from_secs(0)).unwrap();
+		let (id, buffer) = controller.receive(Duration::from_secs(0)).unwrap();
 
-		match fmt {
-			Format::Structured(ref fmt) =>
-				fmt.clone().header(true).format(&header, &buffer[..4], io::stdout()).unwrap(),
+		match id {
+			0x03 =>
+				fmt.format(&power, buffer, io::stdout()).unwrap(),
 
-			Format::Inline(ref fmt) =>
-				fmt.clone().newline(false).format(&header, &buffer[..4], io::stdout()).unwrap()
-		}
+			0x04 =>
+				fmt.format(&idle, buffer, io::stdout()).unwrap(),
 
-		match (buffer[2], buffer[3]) {
-			(0x03, 0x01) =>
-				fmt.format(&power, &buffer[4..], io::stdout()).unwrap(),
+			0x01 =>
+				fmt.format(&input, buffer, io::stdout()).unwrap(),
 
-			(0x04, 0x0b) =>
-				fmt.format(&idle, &buffer[4..], io::stdout()).unwrap(),
-
-			(0x01, 0x3c) =>
-				fmt.format(&input, &buffer[4..], io::stdout()).unwrap(),
-
-			_ =>
-				fmt.format(&unknown, &buffer[4..], io::stdout()).unwrap(),
+			_ => ()
 		}
 
 		println!("");

@@ -59,9 +59,7 @@ impl<'a, 'b> Feedback<'a, 'b> {
 		let period    = self.period;
 		let count     = self.count;
 
-		self.controller.control(|mut buf| {
-			try!(buf.write_u8(0x8f));
-			try!(buf.write_u8(0x08));
+		self.controller.control_with(0x8f, 0x08, |mut buf| {
 			try!(buf.write_u8(side));
 			try!(buf.write_u16::<LittleEndian>(amplitude));
 			try!(buf.write_u16::<LittleEndian>(period));

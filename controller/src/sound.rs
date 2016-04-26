@@ -42,18 +42,18 @@ impl<'a, 'b> Sound<'a, 'b> {
 
 	/// Test a notification sound.
 	pub fn test(self, value: u8) -> Res<()> {
-		self.controller.control(|mut buf| {
-			buf.write(&[
-				0xb6, 0x04, value
-			][..])
+		self.controller.control_with(0xb6, 0x04, |mut buf| {
+			buf.write_u8(value)
 		})
 	}
 
 	/// Change the notification sound when turning on and off the device.
 	pub fn notification(self, on: u8, off: u8) -> Res<()> {
-		self.controller.control(|mut buf| {
+		self.controller.control_with(0xc1, 0x10, |mut buf| {
+			try!(buf.write_u8(on));
+			try!(buf.write_u8(off));
+
 			buf.write(&[
-				0xc1, 0x10, on, off,
 				0xff, 0xff, 0x03, 0x09,
 				0x05, 0xff, 0xff, 0xff,
 				0xff, 0xff, 0xff, 0xff,
@@ -114,9 +114,7 @@ impl<'a, 'b> Sound<'a, 'b> {
 		let duration = self.duration;
 		let period   = 1.0 / FREQUENCIES[if index >= 128 { 127 } else { index }];
 
-		self.controller.control(|mut buf| {
-			try!(buf.write_u8(0x8f));
-			try!(buf.write_u8(0x07));
+		self.controller.control_with(0x8f, 0x07, |mut buf| {
 			try!(buf.write_u8(channel));
 
 			try!(buf.write_u16::<LittleEndian>((period * RATIO).round() as u16));
@@ -137,12 +135,8 @@ impl<'a, 'b> Sound<'a, 'b> {
 	pub fn stop(self) -> Res<()> {
 		let channel = self.channel;
 
-		self.controller.control(|mut buf| {
-			try!(buf.write_u8(0x8f));
-			try!(buf.write_u8(0x07));
-			try!(buf.write_u8(channel));
-
-			Ok(())
+		self.controller.control_with(0x8f, 0x07, |mut buf| {
+			buf.write_u8(channel)
 		})
 	}
 }

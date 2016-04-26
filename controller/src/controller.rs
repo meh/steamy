@@ -2,6 +2,7 @@
 use std::marker::PhantomData;
 
 use std::time::Duration;
+use std::thread;
 use std::io::{self, Cursor, Write};
 use byteorder::{WriteBytesExt};
 
@@ -11,7 +12,11 @@ use usb;
 #[cfg(not(target_os = "linux"))]
 use hid;
 
-use {Result as Res, Error, State, Details, Feedback, Sensors, Led, Sound};
+use {Result as Res, Error, State, Details};
+use {Lizard, Feedback, Sensors, Led, Sound, Calibrate, details};
+
+const LIMIT:    u64 = 10;
+const INCREASE: u64 = 50;
 
 macro_rules! request {
 	($limit:ident, $body:expr) => (
@@ -25,6 +30,8 @@ macro_rules! request {
 					try!(Err(e));
 				}
 
+				thread::sleep(Duration::from_millis((LIMIT - $limit) * INCREASE));
+
 				$limit -= 1;
 				continue;
 			}
@@ -36,6 +43,7 @@ macro_rules! request {
 #[cfg(target_os = "linux")]
 pub struct Controller<'a> {
 	handle: usb::DeviceHandle<'a>,
+	packet: [u8; 64],
 
 	product: u16,
 	address: u8,
@@ -44,7 +52,9 @@ pub struct Controller<'a> {
 
 #[cfg(not(target_os = "linux"))]
 pub struct Controller<'a> {
-	handle:  hid::Handle,
+	handle: hid::Handle,
+	packet: [u8; 65],
+
 	product: u16,
 	marker:  PhantomData<&'a ()>,
 }
@@ -78,38 +88,26 @@ impl<'a> Controller<'a> {
 			}
 		}
 
-		let mut controller = Controller {
-			handle:  handle,
+		Ok(Controller {
+			handle: handle,
+			packet: [0u8; 64],
+
 			product: product,
 			address: try!(address.ok_or(usb::Error::InvalidParam)),
 			index:   index,
-		};
-
-		try!(controller.reset());
-
-		Ok(controller)
+		})
 	}
 
 	#[cfg(not(target_os = "linux"))]
 	pub fn new<'b>(handle: hid::Handle, product: u16) -> Res<Controller<'b>> {
-		let mut controller = Controller {
-			handle:  handle,
+		Ok(Controller {
+			handle: handle,
+			packet: [0u8; 65],
+
 			product: product,
-			marker:  PhantomData,
-		};
 
-		try!(controller.reset());
-
-		Ok(controller)
-	}
-
-	fn reset(&mut self) -> Res<()> {
-		try!(self.sensors().off());
-		try!(self.control(|mut buf| {
-			buf.write_u8(0x81)
-		}));
-
-		Ok(())
+			marker: PhantomData,
+		})
 	}
 
 	/// Check if the controller is remote.
@@ -123,64 +121,99 @@ impl<'a> Controller<'a> {
 	}
 
 	#[doc(hidden)]
-	#[cfg(target_os = "linux")]
-	pub fn control<T, F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>>(&mut self, func: F) -> Res<()> {
-		let mut buf = [0u8; 64];
+	pub fn control(&mut self, id: u8) -> Res<()> {
+		self.control_with(id, 0x00, |_| { Ok(()) })
+	}
 
-		try!(func(Cursor::new(&mut buf)));
-		try!(self.handle.write_control(0x21, 0x09, 0x0300, self.index, &buf, Duration::from_secs(0)));
+	#[doc(hidden)]
+	#[cfg(target_os = "linux")]
+	pub fn control_with<T, F>(&mut self, id: u8, size: u8, func: F) -> Res<()>
+		where F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>
+	{
+		self.packet[0] = id;
+		self.packet[1] = size;
+
+		try!(func(Cursor::new(&mut self.packet[2..])));
+		try!(self.handle.write_control(0x21, 0x09, 0x0300, self.index, &self.packet[..], Duration::from_secs(0)));
 
 		Ok(())
 	}
 
 	#[doc(hidden)]
 	#[cfg(not(target_os = "linux"))]
-	pub fn control<T, F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>>(&mut self, func: F) -> Res<()> {
-		let mut buf = [0u8; 65];
+	pub fn control_with<T, F>(&mut self, func: F) -> Res<()>
+		where F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>
+	{
+		self.packet[1] = id;
+		self.packet[2] = size;
 
-		try!(func(Cursor::new(&mut buf[1..])));
-		try!(self.handle.feature().send(&buf[..]));
+		try!(func(Cursor::new(&mut self.packet[3..])));
+		try!(self.handle.feature().send(&self.packet[..]));
 
 		Ok(())
 	}
 
 	#[doc(hidden)]
+	pub fn request(&mut self, id: u8) -> Res<&[u8]> {
+		self.request_with(id, 0x00, |_| Ok(()))
+	}
+
+	#[doc(hidden)]
 	#[cfg(target_os = "linux")]
-	pub fn request(&mut self, id: u8, mut limit: usize) -> Res<[u8; 64]> {
-		let mut buf = [0u8; 64];
-		buf[0] = id;
+	pub fn request_with<T, F>(&mut self, id: u8, size: u8, func: F) -> Res<&[u8]>
+		where F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>
+	{
+		self.packet[0] = id;
+		self.packet[1] = size;
 
+		try!(func(Cursor::new(&mut self.packet[2..])));
+
+		let mut limit = LIMIT;
 		loop {
-			request!(limit, self.handle.write_control(0x21, 0x09, 0x0300, self.index, &buf, Duration::from_secs(0)));
-			request!(limit, self.handle.read_control(0xa1, 0x01, 0x0300, self.index, &mut buf, Duration::from_secs(0)));
+			request!(limit, self.handle.write_control(0x21, 0x09, 0x0300, self.index,
+				&self.packet[..], Duration::from_secs(0)));
 
-			if buf[1..].iter().any(|&b| b != 0) {
+			request!(limit, self.handle.read_control(0xa1, 0x01, 0x0300,
+				self.index, &mut self.packet[..], Duration::from_secs(0)));
+
+			if self.packet[0] == id && self.packet[1] != 0 {
 				break;
 			}
+
+			request!(limit, Err(Error::NotSupported));
 		}
 
-		Ok(buf)
+		Ok(&self.packet[2 .. (self.packet[1] + 2) as usize])
 	}
 
 	#[doc(hidden)]
 	#[cfg(not(target_os = "linux"))]
-	pub fn request(&mut self, id: u8, mut limit: usize) -> Res<[u8; 64]> {
-		let mut buf = [0u8; 65];
-		buf[1] = 0x83;
+	pub fn request_with<T, F>(&mut self, id: u8, size: u8, func: F) -> Res<&[u8]>
+		where F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>
+	{
+		self.packet[1] = id;
+		self.packet[2] = size;
 
+		try!(func(Cursor::new(&mut self.packet[3..])));
+
+		let mut limit = LIMIT;
 		loop {
-			request!(limit, self.handle.feature().send(&buf[..]));
-			request!(limit, self.handle.feature().get(&mut buf[..]));
+			request!(limit, self.handle.feature().send(&self.packet[..]));
+			request!(limit, self.handle.feature().get(&mut self.packet[..]));
 
-			if buf[2..].iter().any(|&b| b != 0) {
+			if self.packet[1] == id && self.packet[2] != 0 {
 				break;
 			}
+
+			request!(limit, Err(Error::NotSupported));
 		}
 
-		let mut buf_ = [0u8; 64];
-		buf_.clone_from_slice(&buf[1..]);
+		Ok(&self.packet[3 .. (self.packet[2] + 2) as usize])
+	}
 
-		Ok(buf_)
+	/// Get the lizard manager.
+	pub fn lizard<'b>(&'b mut self) -> Lizard<'b, 'a> where 'a: 'b {
+		Lizard::new(self)
 	}
 
 	/// Get the led manager.
@@ -198,6 +231,11 @@ impl<'a> Controller<'a> {
 		Sensors::new(self)
 	}
 
+	/// Get the calibration manager.
+	pub fn calibrate<'b>(&'b mut self) -> Calibrate<'b, 'a> where 'a: 'b {
+		Calibrate::new(self)
+	}
+
 	/// Get the sound player.
 	pub fn sound<'b>(&'b mut self) -> Sound<'b, 'a> where 'a: 'b {
 		Sound::new(self)
@@ -205,55 +243,68 @@ impl<'a> Controller<'a> {
 
 	/// Turn the controller off.
 	pub fn off(&mut self) -> Res<()> {
-		self.control(|mut buf| {
-			buf.write(&[
-				0x9f, 0x04, 0x6f, 0x66,
-				0x66, 0x21
-			][..])
+		self.control_with(0x9f, 0x04, |mut buf| {
+			buf.write(b"off!")
 		})
 	}
 
 	/// Fetch the controller details.
 	pub fn details(&mut self) -> Res<Details> {
-		Details::parse(Cursor::new(&try!(self.request(0x83, 255))[..]))
+		if self.is_wired() {
+			try!(self.request(0x83));
+		}
+
+		let build = try!(details::Build::parse(Cursor::new(try!(
+			self.request(0x83)))));
+
+		let mainboard = try!(details::Serial::parse(Cursor::new(try!(
+			self.request_with(0xae, 0x15, |mut buf| buf.write_u8(0x00))))));
+
+		let controller = try!(details::Serial::parse(Cursor::new(try!(
+			self.request_with(0xae, 0x15, |mut buf| buf.write_u8(0x01))))));
+
+		let receiver = if self.is_remote() {
+			Some(try!(details::Receiver::parse(Cursor::new(try!(
+				self.request(0xa1))))))
+		}
+		else {
+			None
+		};
+
+		Ok(Details {
+			build:    build,
+			receiver: receiver,
+			serial:   details::Serial {
+				mainboard:  mainboard,
+				controller: controller,
+			},
+		})
 	}
 
 	#[doc(hidden)]
 	#[cfg(target_os = "linux")]
-	pub fn state_raw(&mut self, timeout: Duration) -> Res<[u8; 64]> {
-		let mut buf = [0u8; 64];
-
-		if try!(self.handle.read_interrupt(self.address, &mut buf, timeout)) != buf.len() {
+	pub fn receive(&mut self, timeout: Duration) -> Res<(u8, &[u8])> {
+		if try!(self.handle.read_interrupt(self.address, &mut self.packet, timeout)) != 64 {
 			return Err(Error::InvalidParameter);
 		}
 
-		Ok(buf)
+		Ok((self.packet[2], &self.packet[4 .. (self.packet[3] + 4) as usize]))
 	}
 
 	#[doc(hidden)]
 	#[cfg(not(target_os = "linux"))]
-	pub fn state_raw(&mut self, timeout: Duration) -> Res<[u8; 64]> {
-		let mut buf = [0u8; 64];
-
-		if try!(self.handle.data().read(&mut buf[..], timeout)).unwrap_or(0) != buf.len() {
+	pub fn receive(&mut self, timeout: Duration) -> Res<(u8, &[u8])> {
+		if try!(self.handle.data().read(&mut self.packet[1..], timeout)).unwrap_or(0) != 64 {
 			return Err(Error::InvalidParameter);
 		}
 
-		Ok(buf)
+		Ok((self.packet[3], &self.packet[5 .. (self.packet[4] + 5) as usize]))
 	}
 
 	/// Get the current state of the controller.
 	pub fn state(&mut self, timeout: Duration) -> Res<State> {
-		match try!(State::parse(Cursor::new(&try!(self.state_raw(timeout))[..]))) {
-			state@State::Power(true) => {
-				try!(self.reset());
+		let (id, buffer) = try!(self.receive(timeout));
 
-				Ok(state)
-			}
-
-			state => {
-				Ok(state)
-			}
-		}
+		State::parse(id, Cursor::new(buffer))
 	}
 }

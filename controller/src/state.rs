@@ -86,34 +86,9 @@ pub struct Angles {
 
 impl State {
 	/// Parse the state from a given packet.
-	pub fn parse<R: Read + Seek>(mut buffer: R) -> Res<State> {
-		try!(buffer.seek(SeekFrom::Current(2)));
-		let status = try!(buffer.read_u16::<BigEndian>());
-
-		match status {
-			0x0301 => {
-				let mode = try!(buffer.read_u8());
-
-				Ok(State::Power(match mode {
-					0x01 => false,
-					0x02 => true,
-					v    => {
-						println!("invalid power state: {}", v);
-
-						return Err(Error::InvalidParameter);
-					}
-				}))
-			}
-
-			0x040b => {
-				let sequence = try!(buffer.read_u32::<LittleEndian>());
-
-				Ok(State::Idle {
-					sequence: sequence,
-				})
-			}
-
-			0x013c => {
+	pub fn parse<R: Read + Seek>(id: u8, mut buffer: R) -> Res<State> {
+		match id {
+			0x01 => {
 				let sequence = try!(buffer.read_u32::<LittleEndian>());
 
 				let buttons = try!(buffer.read_u32::<BigEndian>());
@@ -178,8 +153,30 @@ impl State {
 				})
 			}
 
+			0x03 => {
+				let mode = try!(buffer.read_u8());
+
+				Ok(State::Power(match mode {
+					0x01 => false,
+					0x02 => true,
+					v    => {
+						println!("unknown power state: {}", v);
+
+						return Err(Error::InvalidParameter);
+					}
+				}))
+			}
+
+			0x04 => {
+				let sequence = try!(buffer.read_u32::<LittleEndian>());
+
+				Ok(State::Idle {
+					sequence: sequence,
+				})
+			}
+
 			v => {
-				println!("invalid packet type: {}", v);
+				println!("unknown packet type: {}", v);
 
 				Err(Error::InvalidParameter)
 			}
