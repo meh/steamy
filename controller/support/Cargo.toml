@@ -24,3 +24,6 @@ name = "victory"
 
 [[bin]]
 name = "request"
+
+[[bin]]
+name = "off"
