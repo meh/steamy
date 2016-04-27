@@ -1,9 +1,10 @@
 [package]
 name    = "steamy-controller"
-version = "0.1.1"
+version = "0.2.0"
 
 authors = ["meh. <meh@schizofreni.co>"]
 license = "WTFPL"
+exclude = ["support/*"]
 
 description = "Library to interact with the Steam controller."
 repository  = "https://github.com/meh/steamy"
