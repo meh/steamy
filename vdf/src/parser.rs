@@ -1,11 +1,19 @@
 use std::str::{self, Utf8Error};
 use std::borrow::Cow;
 
+/// Parser token.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Token<'a> {
+	/// A group is starting.
 	GroupStart,
+
+	/// A group is ending.
 	GroupEnd,
+
+	/// An enclosed or bare item.
 	Item(Cow<'a, str>),
+
+	/// An enclosed or bare statement.
 	Statement(Cow<'a, str>),
 }
 

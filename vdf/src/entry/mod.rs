@@ -1,12 +1,21 @@
+/// The kinds of entry.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Entry {
+	/// A table.
 	Table(Table),
+
+	/// An array (entries with the same key).
 	Array(Array),
+
+	/// A statement (the values starting with #).
 	Statement(Statement),
+
+	/// A value.
 	Value(Value),
 }
 
 impl Entry {
+	/// Lookup an entry with a path.
 	pub fn lookup<S: AsRef<str>>(&self, path: S) -> Option<&Entry> {
 		let mut current = self;
 
@@ -22,6 +31,7 @@ impl Entry {
 		Some(current)
 	}
 
+	/// Try to get the named entry.
 	pub fn get<S: AsRef<str>>(&self, name: S) -> Option<&Entry> {
 		match self {
 			&Entry::Table(ref value) =>
@@ -35,6 +45,7 @@ impl Entry {
 		}
 	}
 
+	/// Try to convert the entry to the given type.
 	pub fn to<T: value::Parse>(&self) -> Option<T> {
 		if let &Entry::Value(ref value) = self {
 			value.to::<T>()
@@ -44,6 +55,7 @@ impl Entry {
 		}
 	}
 
+	/// Try to take the entry as a table.
 	pub fn as_table(&self) -> Option<&Table> {
 		if let &Entry::Table(ref value) = self {
 			Some(value)
@@ -53,6 +65,7 @@ impl Entry {
 		}
 	}
 
+	/// Try to take the entry as a slice.
 	pub fn as_slice(&self) -> Option<&[Entry]> {
 		if let &Entry::Array(ref value) = self {
 			Some(value.as_slice())
@@ -62,6 +75,7 @@ impl Entry {
 		}
 	}
 
+	/// Try to take the entry as a statement.
 	pub fn as_statement(&self) -> Option<&Statement> {
 		if let &Entry::Statement(ref value) = self {
 			Some(value)
@@ -71,6 +85,7 @@ impl Entry {
 		}
 	}
 
+	/// Try to take the entry as a value.
 	pub fn as_value(&self) -> Option<&Value> {
 		if let &Entry::Value(ref value) = self {
 			Some(value)
@@ -80,6 +95,7 @@ impl Entry {
 		}
 	}
 
+	/// Try to take the entry as a string.
 	pub fn as_str(&self) -> Option<&str> {
 		match self {
 			&Entry::Value(ref value) =>

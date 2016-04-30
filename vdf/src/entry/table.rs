@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use reader::{Reader, Event, Item};
 use super::{Entry, Statement, Value, Array};
 
+/// A table of entries.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Table(HashMap<String, Entry>);
 
@@ -25,6 +26,7 @@ fn insert(map: &mut HashMap<String, Entry>, key: String, value: Entry) {
 }
 
 impl Table {
+	/// Load a table from the given `Reader`.
 	pub fn load<R: Read>(reader: &mut Reader<R>) -> io::Result<Table> {
 		let mut map = HashMap::new();
 

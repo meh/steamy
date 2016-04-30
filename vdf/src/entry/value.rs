@@ -25,12 +25,15 @@ impl Deref for Value {
 }
 
 impl Value {
+	/// Try to convert the value to the given type.
 	pub fn to<T: Parse>(&self) -> Option<T> {
 		T::parse(&self.0)
 	}
 }
 
+/// Parsable types.
 pub trait Parse: Sized {
+	/// Try to parse the string.
 	fn parse(string: &str) -> Option<Self>;
 }
 

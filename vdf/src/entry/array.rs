@@ -1,6 +1,7 @@
 use std::ops::{Deref, DerefMut};
 use super::Entry;
 
+/// An array of entries (items that have the same key).
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Array(Vec<Entry>);
 

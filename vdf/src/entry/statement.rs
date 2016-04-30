@@ -1,6 +1,7 @@
 use std::ops::Deref;
 use super::Entry;
 
+/// A statement.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Statement(String);
 

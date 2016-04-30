@@ -4,9 +4,13 @@ use parser::{self, Token};
 use nom::IResult::{Done, Incomplete, Error};
 use nom::Needed;
 
+/// Kinds of item.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Item {
+	/// A statement, the ones starting with #.
 	Statement(String),
+
+	/// A value.
 	Value(String),
 }
 
@@ -33,16 +37,23 @@ impl Deref for Item {
 	}
 }
 
+/// Reader event.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Event {
+	/// A group with the given name is starting.
 	GroupStart(String),
+
+	/// A group has ended.
 	GroupEnd,
 
+	/// An entry.
 	Entry(Item, Item),
 
+	/// EOF has been reached.
 	End,
 }
 
+/// A streaming VDF reader.
 pub struct Reader<R: Read> {
 	stream:   BufReader<R>,
 	buffer:   Vec<u8>,
@@ -90,6 +101,7 @@ impl<R: Read> Reader<R> {
 		Ok(())
 	}
 
+	/// Get the next parser token without doing any copies.
 	pub fn token(&mut self) -> io::Result<Token> {
 		try!(self.prepare());
 
@@ -102,6 +114,7 @@ impl<R: Read> Reader<R> {
 		}
 	}
 
+	/// Get the next event, this does copies.
 	pub fn event(&mut self) -> io::Result<Event> {
 		let key = match self.token() {
 			Err(ref err) if err.kind() == io::ErrorKind::UnexpectedEof =>
