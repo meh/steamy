@@ -1,10 +1,8 @@
 use std::str::{self, Utf8Error};
 use std::borrow::Cow;
-use nom::eof;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Token<'a> {
-	End,
 	GroupStart,
 	GroupEnd,
 	Item(Cow<'a, str>),
@@ -43,15 +41,12 @@ fn string(buffer: &[u8]) -> Result<Cow<str>, Utf8Error> {
 	}
 }
 
-named!(pub next(&[u8]) -> Token, alt!(end |
+named!(pub next(&[u8]) -> Token,
 	chain!(many0!(whitespace) ~ value: alt!(open | close | bare | enclosed) ~ many0!(whitespace),
-		|| { value })));
+		|| { value }));
 
 named!(pub whitespace(&[u8]) -> (),
 	value!((), alt!(char!(' ') | char!('\t') | char!('\n') | char!('\r'))));
-
-named!(pub end(&[u8]) -> Token,
-	value!(Token::End, eof));
 
 named!(pub open(&[u8]) -> Token,
 	value!(Token::GroupStart, char!('{')));

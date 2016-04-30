@@ -10,8 +10,8 @@ pub enum Item {
 	Value(String),
 }
 
-impl Item {
-	pub fn into_inner(self) -> String {
+impl Into<String> for Item {
+	fn into(self) -> String {
 		match self {
 			Item::Statement(s) => s,
 			Item::Value(s)     => s,
@@ -65,25 +65,25 @@ impl<R: Read> Reader<R> {
 			self.buffer.drain(..self.consumed);
 		}
 
-		let mut needed = 1;
-
 		loop {
-			try!(self.stream.by_ref().take(needed as u64).read_to_end(&mut self.buffer));
-
-			match parser::next(&self.buffer) {
+			let needed = match parser::next(&self.buffer) {
 				Error(_) =>
 					return Err(io::Error::new(io::ErrorKind::Other, "parse error")),
 
 				Incomplete(Needed::Size(size)) =>
-					needed = size,
+					size,
 
 				Incomplete(Needed::Unknown) =>
-					needed = 64,
+					64,
 
 				Done(rest, _) => {
 					self.consumed = self.buffer.len() - rest.len();
 					break;
 				}
+			};
+
+			if try!(self.stream.by_ref().take(needed as u64).read_to_end(&mut self.buffer)) == 0 {
+				return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "unexpected eof"));
 			}
 		}
 
@@ -103,37 +103,43 @@ impl<R: Read> Reader<R> {
 	}
 
 	pub fn event(&mut self) -> io::Result<Event> {
-		let key = match try!(self.token()) {
-			Token::End =>
+		let key = match self.token() {
+			Err(ref err) if err.kind() == io::ErrorKind::UnexpectedEof =>
 				return Ok(Event::End),
 
-			Token::GroupEnd =>
+			Err(err) =>
+				return Err(err),
+
+			Ok(Token::GroupEnd) =>
 				return Ok(Event::GroupEnd),
 
-			Token::GroupStart =>
+			Ok(Token::GroupStart) =>
 				return Err(io::Error::new(io::ErrorKind::Other, "unexpected token")),
 
-			Token::Item(s) =>
+			Ok(Token::Item(s)) =>
 				Item::Value(s.into_owned()),
 
-			Token::Statement(s) =>
+			Ok(Token::Statement(s)) =>
 				Item::Statement(s.into_owned()),
 		};
 
-		let value = match try!(self.token()) {
-			Token::End =>
+		let value = match self.token() {
+			Err(ref err) if err.kind() == io::ErrorKind::UnexpectedEof =>
 				return Ok(Event::End),
 
-			Token::GroupEnd =>
+			Err(err) =>
+				return Err(err),
+
+			Ok(Token::GroupEnd) =>
 				return Err(io::Error::new(io::ErrorKind::Other, "unexpected token")),
 
-			Token::GroupStart =>
-				return Ok(Event::GroupStart(key.into_inner())),
+			Ok(Token::GroupStart) =>
+				return Ok(Event::GroupStart(key.into())),
 
-			Token::Item(s) =>
+			Ok(Token::Item(s)) =>
 				Item::Value(s.into_owned()),
 
-			Token::Statement(s) =>
+			Ok(Token::Statement(s)) =>
 				Item::Statement(s.into_owned()),
 		};
 
