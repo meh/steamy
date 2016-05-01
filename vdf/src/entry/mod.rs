@@ -22,7 +22,7 @@ impl Entry {
 		let mut current = self;
 
 		for name in path.as_ref().split('.') {
-			if let Some(entry) = current.get(name) {
+			if let Some(entry) = current.get(name.trim()) {
 				current = entry;
 			}
 			else {
@@ -48,7 +48,7 @@ impl Entry {
 	}
 
 	/// Try to convert the entry to the given type.
-	pub fn to<T: value::Parse>(&self) -> Option<T> {
+	pub fn to<T: Parse>(&self) -> Option<T> {
 		if let &Entry::Value(ref value) = self {
 			value.to::<T>()
 		}
@@ -110,6 +110,43 @@ impl Entry {
 
 			_ =>
 				None
+		}
+	}
+}
+
+/// Parsable types.
+pub trait Parse: Sized {
+	/// Try to parse the string.
+	fn parse(string: &str) -> Option<Self>;
+}
+
+macro_rules! from_str {
+	(for) => ();
+
+	(for $ty:ident $($rest:tt)*) => (
+		from_str!($ty);
+		from_str!(for $($rest)*);
+	);
+
+	($ty:ident) => (
+		impl Parse for $ty {
+			fn parse(string: &str) -> Option<Self> {
+				string.parse::<$ty>().ok()
+			}
+		}
+	);
+}
+
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
+from_str!(for IpAddr Ipv4Addr Ipv6Addr SocketAddr SocketAddrV4 SocketAddrV6);
+from_str!(for i8 i16 i32 i64 isize u8 u16 u32 u64 usize f32 f64);
+
+impl Parse for bool {
+	fn parse(string: &str) -> Option<Self> {
+		match string {
+			"0" => Some(false),
+			"1" => Some(true),
+			v   => v.parse::<bool>().ok()
 		}
 	}
 }

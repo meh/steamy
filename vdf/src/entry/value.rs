@@ -1,5 +1,5 @@
 use std::ops::Deref;
-use super::Entry;
+use super::{Entry, Parse};
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Value(String);
@@ -28,42 +28,5 @@ impl Value {
 	/// Try to convert the value to the given type.
 	pub fn to<T: Parse>(&self) -> Option<T> {
 		T::parse(&self.0)
-	}
-}
-
-/// Parsable types.
-pub trait Parse: Sized {
-	/// Try to parse the string.
-	fn parse(string: &str) -> Option<Self>;
-}
-
-macro_rules! from_str {
-	(for) => ();
-
-	(for $ty:ident $($rest:tt)*) => (
-		from_str!($ty);
-		from_str!(for $($rest)*);
-	);
-
-	($ty:ident) => (
-		impl Parse for $ty {
-			fn parse(string: &str) -> Option<Self> {
-				string.parse::<$ty>().ok()
-			}
-		}
-	);
-}
-
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
-from_str!(for IpAddr Ipv4Addr Ipv6Addr SocketAddr SocketAddrV4 SocketAddrV6);
-from_str!(for i8 i16 i32 i64 isize u8 u16 u32 u64 usize f32 f64);
-
-impl Parse for bool {
-	fn parse(string: &str) -> Option<Self> {
-		match string {
-			"0" => Some(false),
-			"1" => Some(true),
-			v   => v.parse::<bool>().ok()
-		}
 	}
 }

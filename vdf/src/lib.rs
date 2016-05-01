@@ -13,7 +13,7 @@ pub type Result<T> = ::std::result::Result<T, Error>;
 pub mod reader;
 pub use reader::Reader;
 
-mod entry;
+pub mod entry;
 pub use entry::{Table, Entry, Statement, Value};
 
 pub mod parser;
