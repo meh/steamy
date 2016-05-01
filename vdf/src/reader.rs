@@ -1,7 +1,8 @@
 use std::ops::Deref;
-use std::io::{self, Read, BufReader};
+use std::io::{Read, BufReader};
 use parser::{self, Token};
-use nom::IResult::{Done, Incomplete, Error};
+use {Result as Res, Error};
+use nom::IResult::{Done, Incomplete, Error as Fail};
 use nom::Needed;
 
 /// Kinds of item.
@@ -71,15 +72,15 @@ impl<R: Read> From<R> for Reader<R> {
 }
 
 impl<R: Read> Reader<R> {
-	fn prepare(&mut self) -> io::Result<()> {
+	fn prepare(&mut self) -> Res<()> {
 		if self.consumed > 0 {
 			self.buffer.drain(..self.consumed);
 		}
 
 		loop {
 			let needed = match parser::next(&self.buffer) {
-				Error(_) =>
-					return Err(io::Error::new(io::ErrorKind::Other, "parse error")),
+				Fail(_) =>
+					return Err(Error::Parse),
 
 				Incomplete(Needed::Size(size)) =>
 					size,
@@ -94,7 +95,7 @@ impl<R: Read> Reader<R> {
 			};
 
 			if try!(self.stream.by_ref().take(needed as u64).read_to_end(&mut self.buffer)) == 0 {
-				return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "unexpected eof"));
+				return Err(Error::Eof);
 			}
 		}
 
@@ -102,7 +103,7 @@ impl<R: Read> Reader<R> {
 	}
 
 	/// Get the next parser token without doing any copies.
-	pub fn token(&mut self) -> io::Result<Token> {
+	pub fn token(&mut self) -> Res<Token> {
 		try!(self.prepare());
 
 		match parser::next(&self.buffer) {
@@ -115,9 +116,9 @@ impl<R: Read> Reader<R> {
 	}
 
 	/// Get the next event, this does copies.
-	pub fn event(&mut self) -> io::Result<Event> {
+	pub fn event(&mut self) -> Res<Event> {
 		let key = match self.token() {
-			Err(ref err) if err.kind() == io::ErrorKind::UnexpectedEof =>
+			Err(Error::Eof) =>
 				return Ok(Event::End),
 
 			Err(err) =>
@@ -127,7 +128,7 @@ impl<R: Read> Reader<R> {
 				return Ok(Event::GroupEnd),
 
 			Ok(Token::GroupStart) =>
-				return Err(io::Error::new(io::ErrorKind::Other, "unexpected token")),
+				return Err(Error::Parse),
 
 			Ok(Token::Item(s)) =>
 				Item::Value(s.into_owned()),
@@ -137,14 +138,14 @@ impl<R: Read> Reader<R> {
 		};
 
 		let value = match self.token() {
-			Err(ref err) if err.kind() == io::ErrorKind::UnexpectedEof =>
+			Err(Error::Eof) =>
 				return Ok(Event::End),
 
 			Err(err) =>
 				return Err(err),
 
 			Ok(Token::GroupEnd) =>
-				return Err(io::Error::new(io::ErrorKind::Other, "unexpected token")),
+				return Err(Error::Parse),
 
 			Ok(Token::GroupStart) =>
 				return Ok(Event::GroupStart(key.into())),

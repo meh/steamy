@@ -1,8 +1,9 @@
 use std::ops::Deref;
-use std::io::{self, Read};
+use std::io::{Read};
 use std::collections::HashMap;
 use reader::{Reader, Event, Item};
 use super::{Entry, Statement, Value, Array};
+use {Result as Res};
 
 /// A table of entries.
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -27,7 +28,7 @@ fn insert(map: &mut HashMap<String, Entry>, key: String, value: Entry) {
 
 impl Table {
 	/// Load a table from the given `Reader`.
-	pub fn load<R: Read>(reader: &mut Reader<R>) -> io::Result<Table> {
+	pub fn load<R: Read>(reader: &mut Reader<R>) -> Res<Table> {
 		let mut map = HashMap::new();
 
 		loop {
