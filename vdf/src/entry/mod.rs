@@ -1,3 +1,5 @@
+use std::slice;
+
 /// The kinds of entry.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Entry {
@@ -71,7 +73,9 @@ impl Entry {
 			Some(value.as_slice())
 		}
 		else {
-			None
+			unsafe {
+				Some(slice::from_raw_parts(self, 1))
+			}
 		}
 	}
 
