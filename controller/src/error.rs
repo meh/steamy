@@ -1,3 +1,5 @@
+use std::fmt;
+use std::error;
 use std::io;
 
 #[cfg(target_os = "linux")]
@@ -31,5 +33,29 @@ impl From<io::Error> for Error {
 impl From<usb::Error> for Error {
 	fn from(value: usb::Error) -> Self {
 		Error::Usb(value)
+	}
+}
+
+impl fmt::Display for Error {
+	fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+		f.write_str(error::Error::description(self))
+	}
+}
+
+impl error::Error for Error {
+	fn description(&self) -> &str {
+		match self {
+			&Error::Io(ref err) =>
+				err.description(),
+
+			&Error::Usb(ref err) =>
+				err.description(),
+
+			&Error::InvalidParameter =>
+				"Invalid parameter.",
+
+			&Error::NotSupported =>
+				"Unsupported."
+		}
 	}
 }
