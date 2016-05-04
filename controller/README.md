@@ -249,7 +249,8 @@ It's a 24 bit set, the values below are in big endian.
 - `0b000100000000000000000000` the Y button has been pressed.
 - `0b000000000000000000000010` the pad is being pressed.
 - `0b000000000000000000001000` the pad is being touched.
-- `0b000000000000000001000000` the analog has been pressed.
+- `0b000000000000000001000000` the analog stick has been pressed.
+- `0b000000000000000010000000` the analog stick is being touched.
 - `0b000000000000100000000000` the pad down side has been pressed.
 - `0b000000000000010000000000` the pad left side has been pressed.
 - `0b000000000000001000000000` the pad right side has been pressed.
