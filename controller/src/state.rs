@@ -36,7 +36,7 @@ pub enum State {
 }
 
 /// The pressure on the triggers of the controller.
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Default, Debug)]
 pub struct Trigger {
 	/// The left trigger.
 	pub left: f32,
@@ -46,7 +46,7 @@ pub struct Trigger {
 }
 
 /// The pads of the controller.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug)]
 pub struct Pad {
 	/// The left pad.
 	pub left: Axis,
@@ -56,7 +56,7 @@ pub struct Pad {
 }
 
 /// Axis on the pad.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug)]
 pub struct Axis {
 	/// The X axis.
 	pub x: i16,
@@ -72,7 +72,7 @@ impl Axis {
 }
 
 /// 3D position of the controller.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug)]
 pub struct Angles {
 	/// The pitch.
 	pub pitch: i16,
@@ -112,10 +112,6 @@ impl State {
 				let opitch = try!(buffer.read_i16::<LittleEndian>());
 				let oyaw   = try!(buffer.read_i16::<LittleEndian>());
 				let oroll  = try!(buffer.read_i16::<LittleEndian>());
-
-				if Button::from_bits(buttons).is_none() {
-					println!("invalid button state: {:b}", buttons);
-				}
 
 				Ok(State::Input {
 					sequence: sequence,
@@ -159,11 +155,9 @@ impl State {
 				Ok(State::Power(match mode {
 					0x01 => false,
 					0x02 => true,
-					v    => {
-						println!("unknown power state: {}", v);
 
-						return Err(Error::InvalidParameter);
-					}
+					_ =>
+						return Err(Error::InvalidParameter)
 				}))
 			}
 
@@ -175,11 +169,8 @@ impl State {
 				})
 			}
 
-			v => {
-				println!("unknown packet type: {}", v);
-
+			_ =>
 				Err(Error::InvalidParameter)
-			}
 		}
 	}
 }

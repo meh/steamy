@@ -18,9 +18,6 @@ bitflags! {
 		/// Pad has been touched.
 		const PAD_TOUCH = 0b000000000000000000001000,
 
-		/// Analog stick has been pressed.
-		const PAD_ANALOG = 0b000000000000000001000000,
-
 		/// Pad down side has been pressed.
 		const PAD_DOWN = 0b000000000000100000000000,
 
@@ -32,6 +29,12 @@ bitflags! {
 
 		/// Pad up side has been pressed.
 		const PAD_UP = 0b000000000000000100000000,
+
+		/// Analog stick has been pressed.
+		const STICK = 0b000000000000000001000000,
+
+		/// Analog stick input is coming.
+		const STICK_TOUCH = 0b000000000000000010000000,
 
 		/// Trackpad has been pressed.
 		const TRACK = 0b000000000000000000000100,
