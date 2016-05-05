@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 use uinput;
-use {Result as Res, Error};
-use config::{self, Config, group, binding, Binding};
+use {Result as Res};
+use config::{self, Config, group, Binding};
 use input::{self, Event};
 use super::util::iter;
-use super::{button_diamond, trackpad_left};
+use super::{button_diamond, trackpad_left, trigger_left, trigger_right};
 
 pub struct Mapper {
 	config:  Config,
@@ -108,6 +108,18 @@ impl Mapper {
 			Event::Button(btn@input::Button::Pad, press) => {
 				if let Some(bindings) = bindings!(self, config::Input::TrackpadLeft, true, false) {
 					button!(self, trackpad_left, bindings, btn, press);
+				}
+			}
+
+			Event::Button(btn@input::Button::TriggerLeft, press) => {
+				if let Some(bindings) = bindings!(self, config::Input::TriggerLeft, true, false) {
+					button!(self, trigger_left, bindings, btn, press);
+				}
+			}
+
+			Event::Button(btn@input::Button::TriggerRight, press) => {
+				if let Some(bindings) = bindings!(self, config::Input::TriggerRight, true, false) {
+					button!(self, trigger_right, bindings, btn, press);
 				}
 			}
 
