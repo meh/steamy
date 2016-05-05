@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::collections::HashSet;
 use uinput;
 use {Result as Res, Error};
 use config::{self, Config, group, binding, Binding};
@@ -7,9 +7,10 @@ use super::util::iter;
 use super::{button_diamond, trackpad_left};
 
 pub struct Mapper {
-	pub(super) config: Config,
-	pub(super) device: RefCell<uinput::Device>,
-	pub(super) preset: u32,
+	config:  Config,
+	device:  uinput::Device,
+	preset:  u32,
+	pressed: HashSet<uinput::Event>,
 }
 
 impl Mapper {
@@ -75,22 +76,28 @@ impl Mapper {
 				builder.event(binding).unwrap());
 
 		Ok(Mapper {
-			config: config,
-			device: RefCell::new(builder.create()?),
-			preset: 0,
+			config:  config,
+			device:  builder.create()?,
+			preset:  0,
+			pressed: HashSet::new(),
 		})
 	}
 
 	pub fn send(&mut self, event: Event) -> Res<()> {
 		match event {
+			Event::Connected => (),
+			Event::Disconnected => {
+				for event in self.pressed.drain() {
+					self.device.send(event, 0)?;
+				}
+			}
+
 			Event::Button(btn@input::Button::A, press) |
 			Event::Button(btn@input::Button::B, press) |
 			Event::Button(btn@input::Button::X, press) |
 			Event::Button(btn@input::Button::Y, press) => {
-				if let Some(bindings) = self.source(config::Input::ButtonDiamond, true, false)
-					.and_then(|id| self.bindings(id))
-				{
-					button_diamond::button(&mut *self.device.borrow_mut(), bindings, btn, press)?;
+				if let Some(bindings) = bindings!(self, config::Input::ButtonDiamond, true, false) {
+					button!(self, button_diamond, bindings, btn, press);
 				}
 			}
 
@@ -99,34 +106,16 @@ impl Mapper {
 			Event::Button(btn@input::Button::Left, press) |
 			Event::Button(btn@input::Button::Right, press) |
 			Event::Button(btn@input::Button::Pad, press) => {
-				if let Some(bindings) = self.source(config::Input::TrackpadLeft, true, false)
-					.and_then(|id| self.bindings(id))
-				{
-					trackpad_left::button(&mut *self.device.borrow_mut(), bindings, btn, press)?;
+				if let Some(bindings) = bindings!(self, config::Input::TrackpadLeft, true, false) {
+					button!(self, trackpad_left, bindings, btn, press);
 				}
 			}
 
-			event =>
-				println!("{:?}", event)
+			_ => ()
 		}
 
-		self.device.borrow_mut().synchronize()?;
+		self.device.synchronize()?;
 
 		Ok(())
 	}
-
-	fn source(&self, input: config::Input, active: bool, shift: bool) -> Option<u32> {
-		self.config.presets.get(&self.preset).unwrap().sources.values()
-			.find(|s|
-				s.input  == input &&
-				s.active == active &&
-				s.shift  == shift)
-			.map(|s|
-				s.id)
-	}
-
-	fn bindings(&self, id: u32) -> Option<&group::Bindings> {
-		self.config.groups.get(&id).map(|g| &g.bindings)
-	}
-
 }
