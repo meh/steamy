@@ -1,0 +1,331 @@
+"controller_mappings"
+{
+	"version"		"2"
+	"title"		"Sombrezes Bindings"
+	"description"		"Has touch menus for all the weapons, and uses gyro for steering when driving. Hit A to change from the default action set to the driving action set, and hit B to return to the default action set. Enable the gamepad in the options. Requires custom touch menu icons."
+	"creator"		"76561197998740468"
+	"actions"
+	{
+		"Default"
+		{
+			"title"		"Default"
+			"legacy_set"		"1"
+		}
+		"Preset_1000001"
+		{
+			"title"		"Drive"
+			"legacy_set"		"1"
+		}
+	}
+	"group"
+	{
+		"id"		"0"
+		"mode"		"four_buttons"
+		"bindings"
+		{
+			"button_a"		"controller_action CHANGE_PRESET 2 1 1, Drive"
+			"button_a"		"key_press E, Drive"
+			"button_B"		"key_press G, Gravity Gun"
+			"button_X"		"key_press R, Reload"
+			"button_y"		"key_press F, Flashlight"
+		}
+		"settings"
+		{
+			"hold_repeat_inverval"		"99"
+			"button_size"		"17994"
+			"button_dist"		"19994"
+		}
+	}
+	"group"
+	{
+		"id"		"1"
+		"mode"		"dpad"
+		"bindings"
+		{
+			"dpad_north"		"key_press 1, Weapon 1"
+			"dpad_south"		"key_press 3, Weapon 3"
+			"dpad_east"		"key_press 2, Weapon 2"
+			"dpad_west"		"key_press 4, Weapon 4"
+		}
+		"settings"
+		{
+			"hold_repeat_inverval"		"99"
+			"edge_binding_radius"		"24996"
+		}
+	}
+	"group"
+	{
+		"id"		"2"
+		"mode"		"absolute_mouse"
+		"bindings"
+		{
+			"click"		"key_press E, Use"
+			"doubletap"		"key_press R, Reload"
+		}
+		"settings"
+		{
+			"sensitivity"		"165"
+			"haptic_intensity"		"3"
+			"friction"		"1"
+			"mouse_smoothing"		"0"
+			"edge_spin_velocity"		"474"
+			"edge_spin_radius"		"30734"
+			"doubetap_max_duration"		"320"
+		}
+	}
+	"group"
+	{
+		"id"		"3"
+		"mode"		"dpad"
+		"bindings"
+		{
+			"dpad_north"		"key_press W, Move Forward"
+			"dpad_south"		"key_press S, Move Back"
+			"dpad_east"		"key_press D, Move Right"
+			"dpad_west"		"key_press A, Move Left"
+			"click"		"key_press LEFT_SHIFT, Sprint"
+		}
+		"settings"
+		{
+			"requires_click"		"0"
+			"hold_repeat_inverval"		"99"
+			"edge_binding_radius"		"24995"
+			"haptic_intensity"		"3"
+		}
+	}
+	"group"
+	{
+		"id"		"4"
+		"mode"		"trigger"
+		"bindings"
+		{
+			"edge"		"mouse_button RIGHT, Secondary Attack"
+		}
+		"settings"
+		{
+			"hold_repeat_inverval"		"99"
+		}
+	}
+	"group"
+	{
+		"id"		"5"
+		"mode"		"trigger"
+		"bindings"
+		{
+			"edge"		"mouse_button LEFT, Primary Attack"
+		}
+		"settings"
+		{
+			"hold_repeat_inverval"		"99"
+		}
+	}
+	"group"
+	{
+		"id"		"6"
+		"mode"		"scrollwheel"
+		"bindings"
+		{
+			"scroll_clockwise"		"mouse_wheel SCROLL_DOWN"
+			"scroll_counterclockwise"		"mouse_wheel SCROLL_UP"
+			"scroll_wheel_list_0"		"key_press 1, Melee"
+			"scroll_wheel_list_1"		"key_press 2, Pistol"
+			"scroll_wheel_list_2"		"key_press 3, SMG"
+			"scroll_wheel_list_3"		"key_press 4, Shotty"
+		}
+	}
+	"group"
+	{
+		"id"		"7"
+		"mode"		"absolute_mouse"
+		"settings"
+		{
+			"sensitivity"		"172"
+			"haptic_intensity"		"3"
+			"mouse_smoothing"		"0"
+		}
+	}
+	"group"
+	{
+		"id"		"8"
+		"mode"		"touch_menu"
+		"bindings"
+		{
+			"touch_menu_button_0"		"key_press KEYPAD_1, Crowbar, hl2_wpns_angl_1_crowbar.png #232323 #ffdc00"
+			"touch_menu_button_1"		"key_press KEYPAD_3, USP Match, hl2_wpns_angl_2_pistol.png #232323 #ffdc00"
+			"touch_menu_button_2"		"key_press KEYPAD_4, .357 Magnum, hl2_wpns_angl_2_357.png #232323 #ffdc00"
+			"touch_menu_button_3"		"key_press KEYPAD_5, MP7, hl2_wpns_angl_3_smg.png #232323 #ffdc00"
+			"touch_menu_button_4"		"key_press KEYPAD_6, Pulse Rifle, hl2_wpns_angl_3_overwatch.png #232323 #ffdc00"
+			"touch_menu_button_5"		"key_press KEYPAD_7, SPAS-12, hl2_wpns_angl_4_shotgun.png #232323 #ffdc00"
+			"touch_menu_button_6"		"key_press KEYPAD_8, Crossbow, hl2_wpns_angl_4_crossbow.png #232323 #ffdc00"
+			"touch_menu_button_7"		"key_press KEYPAD_9, MK3a2 Grenade, hl2_wpns_angl_5_grenade.png #232323 #ffdc00"
+			"touch_menu_button_8"		"key_press KEYPAD_ENTER, RPG, hl2_wpns_angl_5_rpg.png #232323 #ffdc00"
+			"touch_menu_button_9"		"key_press KEYPAD_PLUS, Pheropods, hl2_wpns_6_bugbait.png #232323 #ffdc00"
+			"touch_menu_button_10"		"key_press C, Squad, ghost_045_move_0180.png #232323 #ffdc00"
+			"touch_menu_button_11"		"key_press Q, Last Weapon, ghost_020_ammo_020.png #232323 #ffdc00"
+			"touch_menu_button_12"		"key_press KEYPAD_2, Gravity Gun, hl2_wpns_angl_1_gravgun.png #232323 #ffdc00"
+		}
+		"settings"
+		{
+			"touch_menu_button_count"		"13"
+			"touch_menu_opacity"		"84"
+			"touch_menu_position_x"		"5"
+			"touch_menu_position_y"		"77"
+			"touch_menu_scale"		"85"
+			"touch_menu_show_labels"		"0"
+		}
+	}
+	"group"
+	{
+		"id"		"9"
+		"mode"		"joystick_move"
+		"settings"
+		{
+			"haptic_intensity"		"3"
+			"output_axis"		"1"
+		}
+	}
+	"group"
+	{
+		"id"		"10"
+		"mode"		"joystick_move"
+		"bindings"
+		{
+			"click"		"key_press LEFT_SHIFT, Sprint"
+		}
+		"settings"
+		{
+			"deadzone_shape"		"1"
+		}
+	}
+	"group"
+	{
+		"id"		"11"
+		"mode"		"four_buttons"
+		"bindings"
+		{
+			"button_B"		"key_press E, Exit Vehicle"
+			"button_B"		"controller_action CHANGE_PRESET 1 1 0, Exit Vehicle"
+		}
+	}
+	"group"
+	{
+		"id"		"12"
+		"mode"		"trigger"
+		"bindings"
+		{
+			"edge"		"xinput_button TRIGGER_LEFT"
+		}
+		"settings"
+		{
+			"output_trigger"		"1"
+			"haptic_intensity"		"3"
+		}
+	}
+	"group"
+	{
+		"id"		"13"
+		"mode"		"trigger"
+		"bindings"
+		{
+			"edge"		"xinput_button TRIGGER_RIGHT"
+		}
+		"settings"
+		{
+			"output_trigger"		"2"
+			"haptic_intensity"		"3"
+		}
+	}
+	"group"
+	{
+		"id"		"14"
+		"mode"		"joystick_move"
+		"settings"
+		{
+			"haptic_intensity"		"3"
+			"gyro_button"		"1"
+			"output_axis"		"1"
+		}
+	}
+	"group"
+	{
+		"id"		"15"
+		"mode"		"joystick_move"
+		"settings"
+		{
+			"haptic_intensity"		"3"
+			"output_axis"		"0"
+		}
+	}
+	"group"
+	{
+		"id"		"16"
+		"mode"		"absolute_mouse"
+		"settings"
+		{
+			"sensitivity"		"199"
+			"haptic_intensity"		"3"
+			"friction"		"1"
+			"mouse_smoothing"		"40"
+		}
+	}
+	"preset"
+	{
+		"id"		"0"
+		"name"		"Default"
+		"group_source_bindings"
+		{
+			"0"		"button_diamond active"
+			"1"		"left_trackpad inactive"
+			"6"		"left_trackpad inactive"
+			"8"		"left_trackpad active"
+			"2"		"right_trackpad active"
+			"3"		"joystick inactive"
+			"10"		"joystick active"
+			"4"		"left_trigger active"
+			"5"		"right_trigger active"
+			"7"		"gyro active"
+			"9"		"gyro inactive"
+		}
+		"switch_bindings"
+		{
+			"bindings"
+			{
+				"button_back_right"		"key_press LEFT_CONTROL, Crouch"
+				"button_escape"		"key_press ESCAPE, Menu"
+				"left_bumper"		"key_press Z, Zoom"
+				"right_bumper"		"key_press Q, Last Weapon"
+				"button_menu"		"key_press F6, Quicksave"
+				"button_back_left"		"key_press SPACE, Jump"
+			}
+		}
+	}
+	"preset"
+	{
+		"id"		"1"
+		"name"		"Preset_1000001"
+		"group_source_bindings"
+		{
+			"11"		"button_diamond active"
+			"16"		"right_trackpad active"
+			"15"		"joystick active"
+			"12"		"left_trigger active"
+			"13"		"right_trigger active"
+			"14"		"gyro active"
+		}
+		"switch_bindings"
+		{
+			"bindings"
+			{
+				"button_back_left"		"key_press LEFT_SHIFT, Turbo"
+				"left_bumper"		"key_press Z, Zoom"
+				"button_back_right"		"key_press SPACE, Handbrake"
+				"button_menu"		"key_press F6, Quicksave"
+				"button_escape"		"key_press ESCAPE, Pause"
+				"right_bumper"		"key_press F, Flashlight"
+			}
+		}
+	}
+	"settings"
+	{
+	}
+}

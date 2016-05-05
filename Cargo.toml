@@ -3,5 +3,18 @@ name    = "steamy"
 version = "0.1.0"
 authors = ["meh. <meh@schizofreni.co>"]
 
+[dependencies]
+clap = "2"
+
 [dependencies.steamy-controller]
 path = "controller"
+
+[dependencies.steamy-vdf]
+path = "vdf"
+
+[target.'cfg(target_os = "linux")'.dependencies.uinput]
+version = "0.1"
+path = "../uinput"
+
+[target.'cfg(target_os = "windows")'.dependencies.winapi]
+version = "0.2"

@@ -13,8 +13,8 @@
 			"button_A"		"key_press ENTER"
 			"button_B"		"key_press LEFT_CONTROL"
 			"button_B"		"key_press W"
-			"button_X"		"key_press PAGE_UP"
-			"button_Y"		"key_press PAGE_DOWN"
+			"button_X"		"key_press K"
+			"button_Y"		"key_press E"
 		}
 	}
 	"group"

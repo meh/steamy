@@ -1,0 +1,151 @@
+"controller_mappings"
+{
+	"version"		"2"
+	"title"		"Gamepad With Camera Controls"
+	"description"		"Your modified configuration for this game."
+	"creator"		"76561198113635013"
+	"group"
+	{
+		"id"		"0"
+		"mode"		"four_buttons"
+		"bindings"
+		{
+			"button_a"		"key_press X"
+			"button_B"		"key_press C"
+			"button_X"		"key_press Z"
+			"button_y"		"key_press V"
+		}
+	}
+	"group"
+	{
+		"id"		"1"
+		"mode"		"dpad"
+		"bindings"
+		{
+			"dpad_north"		"xinput_button dpad_up"
+			"dpad_south"		"xinput_button dpad_down"
+			"dpad_east"		"xinput_button dpad_right"
+			"dpad_west"		"xinput_button dpad_left"
+		}
+	}
+	"group"
+	{
+		"id"		"2"
+		"mode"		"mouse_joystick"
+		"bindings"
+		{
+			"click"		"xinput_button JOYSTICK_RIGHT"
+		}
+	}
+	"group"
+	{
+		"id"		"3"
+		"mode"		"joystick_move"
+		"bindings"
+		{
+			"click"		"xinput_button JOYSTICK_LEFT"
+		}
+	}
+	"group"
+	{
+		"id"		"4"
+		"mode"		"trigger"
+		"bindings"
+		{
+			"click"		"xinput_button TRIGGER_LEFT"
+		}
+		"settings"
+		{
+			"output_trigger"		"1"
+		}
+	}
+	"group"
+	{
+		"id"		"5"
+		"mode"		"trigger"
+		"bindings"
+		{
+			"click"		"key_press H"
+		}
+		"settings"
+		{
+			"output_trigger"		"2"
+		}
+	}
+	"group"
+	{
+		"id"		"6"
+		"mode"		"joystick_move"
+		"bindings"
+		{
+			"click"		"xinput_button JOYSTICK_RIGHT"
+		}
+		"settings"
+		{
+			"output_joystick"		"1"
+		}
+	}
+	"group"
+	{
+		"id"		"7"
+		"mode"		"four_buttons"
+		"bindings"
+		{
+			"button_a"		"key_press O"
+			"button_B"		"key_press U"
+			"button_X"		"key_press P"
+			"button_y"		"key_press Y"
+		}
+		"gameactions"
+		{
+		}
+	}
+	"group"
+	{
+		"id"		"8"
+		"mode"		"trigger"
+		"bindings"
+		{
+			"click"		"key_press 5"
+		}
+		"gameactions"
+		{
+		}
+	}
+	"preset"
+	{
+		"id"		"0"
+		"name"		"default"
+		"group_source_bindings"
+		{
+			"0"		"button_diamond active"
+			"7"		"button_diamond active modeshift"
+			"1"		"left_trackpad active"
+			"2"		"right_trackpad active"
+			"6"		"right_trackpad inactive"
+			"3"		"joystick active"
+			"4"		"left_trigger active"
+			"5"		"right_trigger active"
+			"8"		"right_trigger active modeshift"
+		}
+		"switch_bindings"
+		{
+			"bindings"
+			{
+				"button_escape"		"xinput_button start"
+				"button_menu"		"xinput_button select"
+				"right_bumper"		"xinput_button shoulder_right"
+				"left_bumper"		"xinput_button shoulder_left"
+				"button_back_left"		"xinput_button a"
+				"button_back_right"		"xinput_button x"
+				"right_trigger"		"mode_shift button_diamond 7"
+				"button_X"		"mode_shift right_trigger 8"
+			}
+		}
+	}
+	"settings"
+	{
+		"left_trackpad_mode"		"0"
+		"right_trackpad_mode"		"0"
+	}
+}
