@@ -1,4 +1,5 @@
 use vdf;
+use vdf::entry::Parse;
 use config::group::Mode;
 use {Result as Res};
 
@@ -9,6 +10,7 @@ pub struct Settings {
 	pub button:   Button,
 	pub pad:      Pad,
 	pub menu:     Menu,
+	pub output:   Output,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug)]
@@ -71,6 +73,28 @@ pub struct Position {
 	pub y: Option<u32>,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Default, Debug)]
+pub struct Output {
+	joystick: Option<Side>,
+	trigger:  Option<Side>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Side {
+	Left,
+	Right,
+}
+
+impl Parse for Side {
+	fn parse(string: &str) -> Option<Side> {
+		match string {
+			"1" => Some(Side::Left),
+			"2" => Some(Side::Right),
+			_   => None,
+		}
+	}
+}
+
 impl Settings {
 	pub fn load(_mode: Mode, table: &vdf::Entry) -> Res<Self> {
 		let mut settings = Settings::default();
@@ -94,6 +118,8 @@ impl Settings {
 		settings.menu.position.y         = lookup!(table@touch_menu_position_y as u32).ok();
 		settings.menu.scale              = lookup!(table@touch_menu_scale as u8).ok();
 		settings.menu.labels             = lookup!(table@touch_menu_show_labels as bool).unwrap_or(false);
+		settings.output.joystick         = lookup!(table@output_joystick as Side).ok();
+		settings.output.trigger          = lookup!(table@output_trigger as Side).ok();
 
 		Ok(settings)
 	}
