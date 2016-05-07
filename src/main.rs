@@ -9,6 +9,9 @@ use clap::{Arg, App};
 #[cfg(target_os = "linux")]
 extern crate uinput;
 
+#[macro_use]
+mod util;
+
 mod error;
 pub use error::Error;
 
@@ -32,10 +35,13 @@ fn main() {
 			.help("Path to the config file."))
 		.get_matches();
 
-	let mut mapper = mapper::new(config::load(matches.value_of("CONFIG").unwrap()).unwrap()).unwrap();
+	let     config = config::load(matches.value_of("CONFIG").unwrap()).expect("config: failed to load");
 	let     input  = input::spawn();
+	let mut mapper = mapper::new(&config).expect("mapper: failed to create");
 
-	for event in input.iter() {
-		mapper.send(event).unwrap();
+	println!("{:#?}", config);
+
+	for (at, event) in input.iter() {
+		end!(mapper.event(at, event));
 	}
 }

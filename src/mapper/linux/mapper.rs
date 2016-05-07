@@ -1,20 +1,22 @@
-use std::collections::HashSet;
+use std::time::Instant;
+use std::collections::{HashSet, HashMap};
 use uinput;
 use {Result as Res};
+use util::iter;
 use config::{self, Config, group, Binding};
 use input::{self, Event};
-use super::util::iter;
-use super::{button_diamond, trackpad_left, trigger_left, trigger_right};
+use super::Preset;
 
-pub struct Mapper {
-	config:  Config,
+pub struct Mapper<'a> {
+	config:  &'a Config,
 	device:  uinput::Device,
 	preset:  u32,
+	presets: HashMap<u32, Preset<'a>>,
 	pressed: HashSet<uinput::Event>,
 }
 
-impl Mapper {
-	pub fn new(config: Config) -> Res<Self> {
+impl<'a> Mapper<'a> {
+	pub fn new(config: &Config) -> Res<Mapper> {
 		let builder = uinput::default()?.name("steamy")?;
 
 		// Enable events from modes.
@@ -75,15 +77,21 @@ impl Mapper {
 			.fold(builder, |builder, binding|
 				builder.event(binding).unwrap());
 
+		let presets = config.presets.keys().map(|&id|
+			Ok((id, Preset::load(id, config)?)));
+
 		Ok(Mapper {
 			config:  config,
 			device:  builder.create()?,
 			preset:  0,
+			presets: presets.collect::<Res<HashMap<u32, Preset>>>()?,
 			pressed: HashSet::new(),
 		})
 	}
 
-	pub fn send(&mut self, event: Event) -> Res<()> {
+	pub fn event(&mut self, at: Instant, event: Event) -> Res<()> {
+		println!("{:#?}", event);
+
 		match event {
 			Event::Connected => (),
 			Event::Disconnected => {
@@ -96,9 +104,7 @@ impl Mapper {
 			Event::Button(btn@input::Button::B, press) |
 			Event::Button(btn@input::Button::X, press) |
 			Event::Button(btn@input::Button::Y, press) => {
-				if let Some(bindings) = bindings!(self, config::Input::ButtonDiamond, true, false) {
-					button!(self, button_diamond, bindings, btn, press);
-				}
+				button!(self, button_diamond, at, btn, press);
 			}
 
 			Event::Button(btn@input::Button::Up, press) |
@@ -106,21 +112,19 @@ impl Mapper {
 			Event::Button(btn@input::Button::Left, press) |
 			Event::Button(btn@input::Button::Right, press) |
 			Event::Button(btn@input::Button::Pad, press) => {
-				if let Some(bindings) = bindings!(self, config::Input::TrackpadLeft, true, false) {
-					button!(self, trackpad_left, bindings, btn, press);
-				}
+				button!(self, pad_left, at, btn, press);
+			}
+
+			Event::Button(btn@input::Button::Track, press) => {
+				button!(self, pad_right, at, btn, press);
 			}
 
 			Event::Button(btn@input::Button::TriggerLeft, press) => {
-				if let Some(bindings) = bindings!(self, config::Input::TriggerLeft, true, false) {
-					button!(self, trigger_left, bindings, btn, press);
-				}
+				button!(self, trigger_left, at, btn, press);
 			}
 
 			Event::Button(btn@input::Button::TriggerRight, press) => {
-				if let Some(bindings) = bindings!(self, config::Input::TriggerRight, true, false) {
-					button!(self, trigger_right, bindings, btn, press);
-				}
+				button!(self, trigger_right, at, btn, press);
 			}
 
 			_ => ()

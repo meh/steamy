@@ -53,7 +53,11 @@ macro_rules! binding {
 	);
 
 	($table:ident, $path:expr) => (
-		if let Some(value) = $table.lookup($path).and_then(|v| v.as_slice()) {
+		binding!($table.lookup($path).and_then(|v| v.as_slice()))
+	);
+
+	($entries:expr) => (
+		if let Some(value) = $entries {
 			value.iter()
 				.map($crate::config::Binding::load)
 				.collect::<$crate::Result<Vec<$crate::config::Binding>>>()

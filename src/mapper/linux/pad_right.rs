@@ -8,16 +8,16 @@ use config::{Group, group};
 use util::iter;
 
 #[derive(Debug)]
-pub struct TriggerRight<'a> {
+pub struct PadRight<'a> {
 	normal: Option<&'a Group>,
 	shift:  Option<&'a Group>,
 
 	shifted: bool,
 }
 
-impl<'a> TriggerRight<'a> {
-	pub fn load(normal: Option<&'a Group>, shift: Option<&'a Group>) -> Res<TriggerRight<'a>> {
-		Ok(TriggerRight {
+impl<'a> PadRight<'a> {
+	pub fn load(normal: Option<&'a Group>, shift: Option<&'a Group>) -> Res<PadRight<'a>> {
+		Ok(PadRight {
 			normal: normal,
 			shift:  shift,
 
@@ -41,10 +41,10 @@ impl<'a> TriggerRight<'a> {
 	pub fn button(&self, device: &mut uinput::Device, _at: Instant, button: input::Button, press: bool) -> Res<HashSet<uinput::Event>> {
 		let bindings = if let Some(bindings) = self.bindings() {
 			match bindings {
-				&group::Bindings::Trigger { ref click } => {
+				&group::Bindings::AbsoluteMouse { ref click, .. } => {
 					match button {
-						input::Button::TriggerRight => iter(click.iter().flat_map(|b| b.iter())),
-						_                          => unreachable!(),
+						input::Button::Track => iter(click.iter().flat_map(|b| b.iter())),
+						_                    => unreachable!(),
 					}
 				}
 

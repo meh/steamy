@@ -20,8 +20,8 @@ pub enum Input {
 	GripRight,
 
 	ButtonDiamond,
-	TrackpadRight,
-	TrackpadLeft,
+	PadRight,
+	PadLeft,
 	Joystick,
 	Gyro,
 }
@@ -47,8 +47,8 @@ impl Input {
 			"button_back_left"  => Input::GripLeft,
 			"button_back_right" => Input::GripRight,
 
-			"left_trackpad"  => Input::TrackpadLeft,
-			"right_trackpad" => Input::TrackpadRight,
+			"left_trackpad"  => Input::PadLeft,
+			"right_trackpad" => Input::PadRight,
 			"joystick"       => Input::Joystick,
 			"gyro"           => Input::Gyro,
 

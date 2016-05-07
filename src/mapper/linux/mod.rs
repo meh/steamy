@@ -4,7 +4,20 @@ mod util;
 mod mapper;
 pub use self::mapper::Mapper;
 
+mod preset;
+pub use self::preset::Preset;
+
 mod button_diamond;
-mod trackpad_left;
+pub use self::button_diamond::ButtonDiamond;
+
+mod pad_left;
+pub use self::pad_left::PadLeft;
+
+mod pad_right;
+pub use self::pad_right::PadRight;
+
 mod trigger_left;
+pub use self::trigger_left::TriggerLeft;
+
 mod trigger_right;
+pub use self::trigger_right::TriggerRight;

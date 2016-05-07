@@ -1,32 +1,10 @@
 use uinput;
 use config::binding::{self, Binding};
 
-macro_rules! source {
-	($mapper:expr, $input:expr, $active:expr, $shift:expr) => (
-		$mapper.config.presets.get(&$mapper.preset).unwrap().sources.values()
-			.find(|s|
-				s.input  == $input &&
-				s.active == $active &&
-				s.shift  == $shift)
-			.map(|s|
-				s.id)
-	);
-}
-
-macro_rules! bindings {
-	($mapper:expr, $input:expr, $active:expr, $shift:expr) => (
-		if let Some(id) = source!($mapper, $input, $active, $shift) {
-			$mapper.config.groups.get(&id).map(|g| &g.bindings)
-		}
-		else {
-			None
-		}
-	);
-}
-
 macro_rules! button {
-	($mapper:expr, $module:ident, $bindings:expr, $button:expr, $press:expr) => ({
-		let events = $module::button(&mut $mapper.device, $bindings, $button, $press)?;
+	($mapper:expr, $module:ident, $at:expr, $button:expr, $press:expr) => ({
+		let events = $mapper.presets.get(&$mapper.preset).unwrap()
+			.$module.button(&mut $mapper.device, $at, $button, $press)?;
 
 		if $press {
 			for event in events {
@@ -39,10 +17,6 @@ macro_rules! button {
 			}
 		}
 	});
-}
-
-pub fn iter<'a, T: Iterator + 'a>(it: T) -> Box<Iterator<Item=T::Item> + 'a> {
-	Box::new(it)
 }
 
 impl<'a> Into<uinput::Event> for &'a Binding {

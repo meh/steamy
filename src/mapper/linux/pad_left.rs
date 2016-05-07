@@ -1,23 +1,23 @@
 use std::iter;
 use std::time::Instant;
 use std::collections::HashSet;
-use uinput;
 use {Result as Res, Error};
+use uinput;
 use input;
 use config::{Group, group};
 use util::iter;
 
 #[derive(Debug)]
-pub struct ButtonDiamond<'a> {
+pub struct PadLeft<'a> {
 	normal: Option<&'a Group>,
 	shift:  Option<&'a Group>,
 
 	shifted: bool,
 }
 
-impl<'a> ButtonDiamond<'a> {
-	pub fn load(normal: Option<&'a Group>, shift: Option<&'a Group>) -> Res<ButtonDiamond<'a>> {
-		Ok(ButtonDiamond {
+impl<'a> PadLeft<'a> {
+	pub fn load(normal: Option<&'a Group>, shift: Option<&'a Group>) -> Res<PadLeft<'a>> {
+		Ok(PadLeft {
 			normal: normal,
 			shift:  shift,
 
@@ -43,21 +43,23 @@ impl<'a> ButtonDiamond<'a> {
 			match bindings {
 				&group::Bindings::FourButtons { ref a, ref b, ref x, ref y } => {
 					match button {
-						input::Button::A => iter(a.iter().flat_map(|b| b.iter())),
-						input::Button::B => iter(b.iter().flat_map(|b| b.iter())),
-						input::Button::X => iter(x.iter().flat_map(|b| b.iter())),
-						input::Button::Y => iter(y.iter().flat_map(|b| b.iter())),
-						_                => unreachable!(),
+						input::Button::Down  => iter(a.iter().flat_map(|b| b.iter())),
+						input::Button::Right => iter(b.iter().flat_map(|b| b.iter())),
+						input::Button::Left  => iter(x.iter().flat_map(|b| b.iter())),
+						input::Button::Up    => iter(y.iter().flat_map(|b| b.iter())),
+						input::Button::Pad   => iter(iter::empty()),
+						_                    => unreachable!(),
 					}
 				}
 
-				&group::Bindings::DPad { ref north, ref south, ref east, ref west, .. } => {
+				&group::Bindings::DPad { ref north, ref south, ref east, ref west, ref click } => {
 					match button {
-						input::Button::A => iter(south.iter().flat_map(|b| b.iter())),
-						input::Button::B => iter(east.iter().flat_map(|b| b.iter())),
-						input::Button::X => iter(west.iter().flat_map(|b| b.iter())),
-						input::Button::Y => iter(north.iter().flat_map(|b| b.iter())),
-						_                => unreachable!(),
+						input::Button::Down  => iter(south.iter().flat_map(|b| b.iter())),
+						input::Button::Right => iter(east.iter().flat_map(|b| b.iter())),
+						input::Button::Left  => iter(west.iter().flat_map(|b| b.iter())),
+						input::Button::Up    => iter(north.iter().flat_map(|b| b.iter())),
+						input::Button::Pad   => iter(click.iter().flat_map(|b| b.iter())),
+						_                    => unreachable!(),
 					}
 				}
 
