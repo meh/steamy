@@ -7,6 +7,9 @@ pub use self::mapper::Mapper;
 mod preset;
 pub use self::preset::Preset;
 
+mod switch;
+pub use self::switch::Switch;
+
 mod button_diamond;
 pub use self::button_diamond::ButtonDiamond;
 

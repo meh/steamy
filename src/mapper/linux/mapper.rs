@@ -90,14 +90,16 @@ impl<'a> Mapper<'a> {
 	}
 
 	pub fn event(&mut self, at: Instant, event: Event) -> Res<()> {
-		println!("{:#?}", event);
-
 		match event {
 			Event::Connected => (),
 			Event::Disconnected => {
 				for event in self.pressed.drain() {
 					self.device.send(event, 0)?;
 				}
+			}
+
+			Event::Button(btn, press) if switch!(self, btn) => {
+				button!(self, switch, at, btn, press);
 			}
 
 			Event::Button(btn@input::Button::A, press) |

@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 use vdf;
-use super::{Config, Group, Preset};
-use super::group::{self, Mode};
-use super::preset;
+use vdf::entry::Parse;
+use config::{Config, Group, Preset};
+use config::group::{self, Mode};
+use config::preset;
+use config::Binding;
 use {Result as Res, Error};
 
 pub fn load(table: &vdf::Entry) -> Res<Config> {
@@ -57,12 +59,18 @@ pub fn load(table: &vdf::Entry) -> Res<Config> {
 			Ok((id, source))
 		}).collect::<Res<HashMap<u32, preset::Source>>>()?;
 
-		let switch = 
+		let bindings = lookup!(preset@switch_bindings.bindings as table)?.iter().map(|(key, entry)| {
+			let button  = ok!(preset::Button::parse(&key))?;
+			let binding = ok!(binding!(entry.as_slice())?)?;
+
+			Ok((button, binding))
+		}).collect::<Res<HashMap<preset::Button, Vec<Binding>>>>()?;
 
 		presets.insert(id, Preset {
-			id:      id,
-			name:    name,
-			sources: sources,
+			id:       id,
+			name:     name,
+			sources:  sources,
+			bindings: bindings,
 		});
 	}
 

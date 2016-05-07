@@ -1,10 +1,21 @@
 use uinput;
 use config::binding::{self, Binding};
 
+macro_rules! switch {
+	($mapper:expr, $button:expr) => (
+		$mapper.presets.get(&$mapper.preset).unwrap().handles($button)
+	);
+}
+
+macro_rules! preset {
+	($mapper:expr) => (
+		$mapper.presets.get_mut(&$mapper.preset).unwrap()
+	);
+}
+
 macro_rules! button {
 	($mapper:expr, $module:ident, $at:expr, $button:expr, $press:expr) => ({
-		let events = $mapper.presets.get(&$mapper.preset).unwrap()
-			.$module.button(&mut $mapper.device, $at, $button, $press)?;
+		let events = preset!($mapper).$module().button(&mut $mapper.device, $at, $button, $press)?;
 
 		if $press {
 			for event in events {
