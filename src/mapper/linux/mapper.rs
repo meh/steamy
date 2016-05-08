@@ -5,7 +5,7 @@ use {Result as Res};
 use util::iter;
 use config::{self, Config, group, Binding};
 use input::{self, Event};
-use super::Preset;
+use super::{Preset, Button};
 
 pub struct Mapper<'a> {
 	config:  &'a Config,
@@ -68,12 +68,7 @@ impl<'a> Mapper<'a> {
 			.flat_map(|binding|
 				binding.iter())
 			.filter(|&binding|
-				if let &Binding::Action(..) = binding {
-					false
-				}
-				else {
-					true
-				})
+				if let &Binding::Action(..) = binding { false } else { true })
 			.fold(builder, |builder, binding|
 				builder.event(binding).unwrap());
 
@@ -106,7 +101,7 @@ impl<'a> Mapper<'a> {
 			Event::Button(btn@input::Button::B, press) |
 			Event::Button(btn@input::Button::X, press) |
 			Event::Button(btn@input::Button::Y, press) => {
-				button!(self, button_diamond, at, btn, press);
+				button!(self, button_diamond, at, btn, press)?;
 			}
 
 			Event::Button(btn@input::Button::Up, press) |
@@ -114,19 +109,19 @@ impl<'a> Mapper<'a> {
 			Event::Button(btn@input::Button::Left, press) |
 			Event::Button(btn@input::Button::Right, press) |
 			Event::Button(btn@input::Button::Pad, press) => {
-				button!(self, pad_left, at, btn, press);
+				button!(self, pad_left, at, btn, press)?;
 			}
 
 			Event::Button(btn@input::Button::Track, press) => {
-				button!(self, pad_right, at, btn, press);
+				button!(self, pad_right, at, btn, press)?;
 			}
 
 			Event::Button(btn@input::Button::TriggerLeft, press) => {
-				button!(self, trigger_left, at, btn, press);
+				button!(self, trigger_left, at, btn, press)?;
 			}
 
 			Event::Button(btn@input::Button::TriggerRight, press) => {
-				button!(self, trigger_right, at, btn, press);
+				button!(self, trigger_right, at, btn, press)?;
 			}
 
 			_ => ()

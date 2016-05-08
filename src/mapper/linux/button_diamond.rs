@@ -4,8 +4,9 @@ use std::collections::HashSet;
 use uinput;
 use {Result as Res, Error};
 use input;
-use config::{Group, group};
+use config::{Binding, Group, group};
 use util::iter;
+use super::{util, Button};
 
 #[derive(Debug)]
 pub struct ButtonDiamond<'a> {
@@ -37,8 +38,10 @@ impl<'a> ButtonDiamond<'a> {
 	pub fn bindings(&self) -> Option<&group::Bindings> {
 		self.group().map(|g| &g.bindings)
 	}
+}
 
-	pub fn button(&self, device: &mut uinput::Device, _at: Instant, button: input::Button, press: bool) -> Res<HashSet<uinput::Event>> {
+impl<'a> Button for ButtonDiamond<'a> {
+	fn button(&mut self, device: &mut uinput::Device, _at: Instant, button: input::Button, press: bool) -> Res<HashSet<&Binding>> {
 		let bindings = if let Some(bindings) = self.bindings() {
 			match bindings {
 				&group::Bindings::FourButtons { ref a, ref b, ref x, ref y } => {
@@ -69,8 +72,6 @@ impl<'a> ButtonDiamond<'a> {
 			iter(iter::empty())
 		};
 
-		Ok(bindings.map(|binding|
-			device.send(binding, if press { 1 } else { 0 })
-				.map(|_| binding.into())).collect()?)
+		util::button(device, bindings, press)
 	}
 }

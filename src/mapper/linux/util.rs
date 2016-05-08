@@ -1,4 +1,6 @@
+use std::collections::HashSet;
 use uinput;
+use {Result as Res};
 use config::binding::{self, Binding};
 
 macro_rules! switch {
@@ -15,19 +17,46 @@ macro_rules! preset {
 
 macro_rules! button {
 	($mapper:expr, $module:ident, $at:expr, $button:expr, $press:expr) => ({
-		let events = preset!($mapper).$module().button(&mut $mapper.device, $at, $button, $press)?;
+		match $crate::mapper::linux::Button::button(&mut preset!($mapper).$module, &mut $mapper.device, $at, $button, $press) {
+			Err(err)     => Err(err),
+			Ok(bindings) => {
+				let mut actions = Vec::new();
 
-		if $press {
-			for event in events {
-				$mapper.pressed.insert(event);
-			}
-		}
-		else {
-			for event in events {
-				$mapper.pressed.remove(&event);
+				for binding in bindings {
+					if let &Binding::Action(action) = binding {
+						actions.push(action);
+					}
+					else {
+						if $press {
+							$mapper.pressed.insert(binding.into());
+						}
+						else {
+							$mapper.pressed.remove(&binding.into());
+						}
+					}
+				}
+
+				Ok(actions)
 			}
 		}
 	});
+}
+
+pub fn button<'a, T: Iterator<Item = &'a Binding>>(device: &mut uinput::Device, events: T, press: bool) -> Res<HashSet<&'a Binding>> {
+	events.map(|binding|
+		if let &Binding::Action(..) = binding {
+			Ok(binding)
+		}
+		else {
+			device.send(binding, if press { 1 } else { 0 })?;
+			Ok(binding)
+		}).collect()
+}
+
+impl Into<uinput::Event> for Binding {
+	fn into(self) -> uinput::Event {
+		(&self).into()
+	}
 }
 
 impl<'a> Into<uinput::Event> for &'a Binding {

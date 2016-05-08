@@ -6,22 +6,24 @@ use {Result as Res};
 use input;
 use config::{self, Binding, Config, preset};
 use util::iter;
-use super::Preset;
+use super::{Preset, Button, util};
 
-pub struct Switch<'b, 'a: 'b> {
-	preset: &'b mut Preset<'a>,
+pub struct Switch<'a> {
+	config: &'a preset::Preset,
 }
 
-impl<'a, 'b> Switch<'a, 'b> {
-	pub fn new(preset: &'b mut Preset<'a>) -> Switch<'b, 'a> {
-		Switch {
-			preset: preset,
-		}
+impl<'a> Switch<'a> {
+	pub fn load(config: &'a preset::Preset) -> Res<Switch<'a>> {
+		Ok(Switch {
+			config: config,
+		})
 	}
+}
 
-	pub fn button(&self, device: &mut uinput::Device, _at: Instant, button: input::Button, press: bool) -> Res<HashSet<uinput::Event>> {
+impl<'a> Button for Switch<'a> {
+	fn button(&mut self, device: &mut uinput::Device, _at: Instant, button: input::Button, press: bool) -> Res<HashSet<&Binding>> {
 		let bindings = if let Some(button) = convert(button) {
-			if let Some(bindings) = self.preset.config.bindings.get(&button) {
+			if let Some(bindings) = self.config.bindings.get(&button) {
 				iter(bindings.iter())
 			}
 			else {
@@ -32,12 +34,7 @@ impl<'a, 'b> Switch<'a, 'b> {
 			iter(iter::empty())
 		};
 
-		let (keys, actions): (Vec<&Binding>, Vec<&Binding>) = bindings.partition(|&binding|
-			if let &Binding::Action(..) = binding { false } else { true });
-
-		Ok(keys.iter().map(|&binding|
-			device.send(binding, if press { 1 } else { 0 })
-				.map(|_| binding.into())).collect()?)
+		util::button(device, bindings, press)
 	}
 }
 

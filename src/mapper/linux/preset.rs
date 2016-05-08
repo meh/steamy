@@ -11,6 +11,7 @@ pub struct Preset<'a> {
 	pub id:     u32,
 	pub config: &'a config::Preset,
 
+	pub switch:         Switch<'a>,
 	pub button_diamond: ButtonDiamond<'a>,
 	pub pad_left:       PadLeft<'a>,
 	pub pad_right:      PadRight<'a>,
@@ -20,9 +21,13 @@ pub struct Preset<'a> {
 
 impl<'a> Preset<'a> {
 	pub fn load(id: u32, config: &Config) -> Res<Preset> {
+		let preset = config.presets.get(&id).unwrap();
+
 		Ok(Preset {
 			id:     id,
-			config: config.presets.get(&id).unwrap(),
+			config: preset,
+
+			switch: Switch::load(preset)?,
 
 			button_diamond: ButtonDiamond::load(
 				group_by!(config, id, config::Input::ButtonDiamond, true, false),
@@ -55,27 +60,7 @@ impl<'a> Preset<'a> {
 		}
 	}
 
-	pub fn switch<'b>(&'b mut self) -> Switch<'b, 'a> where 'a: 'b {
-		Switch::new(self)
-	}
+	pub fn shift(&mut self, id: u32) {
 
-	pub fn button_diamond<'b>(&'b mut self) -> &'b mut ButtonDiamond<'a> where 'a: 'b {
-		&mut self.button_diamond
-	}
-
-	pub fn pad_left<'b>(&'b mut self) -> &'b mut PadLeft<'a> where 'a: 'b {
-		&mut self.pad_left
-	}
-
-	pub fn pad_right<'b>(&'b mut self) -> &'b mut PadRight<'a> where 'a: 'b {
-		&mut self.pad_right
-	}
-
-	pub fn trigger_left<'b>(&'b mut self) -> &'b mut TriggerLeft<'a> where 'a: 'b {
-		&mut self.trigger_left
-	}
-
-	pub fn trigger_right<'b>(&'b mut self) -> &'b mut TriggerRight<'a> where 'a: 'b {
-		&mut self.trigger_right
 	}
 }

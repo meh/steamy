@@ -2,7 +2,7 @@ use vdf;
 use {Result as Res, Error};
 use super::Input;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum Binding {
 	Key(Key),
 	KeyPad(KeyPad),
@@ -11,7 +11,7 @@ pub enum Binding {
 	Action(Action),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum Key {
 	Esc,
 
@@ -118,7 +118,7 @@ impl Into<Binding> for Key {
 	}
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum KeyPad {
 	NumLock,
 	Slash,
@@ -149,7 +149,7 @@ impl Into<Binding> for KeyPad {
 	}
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum XBox {
 	LT,
 	LB,
@@ -179,7 +179,7 @@ impl Into<Binding> for XBox {
 	}
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum Mouse {
 	Left,
 	Middle,
@@ -198,7 +198,7 @@ impl Into<Binding> for Mouse {
 	}
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum Action {
 	ShowKeyboard,
 	ChangePreset(u32, u32, u32),

@@ -1,6 +1,9 @@
 #[macro_use]
 mod util;
 
+mod traits;
+pub use self::traits::Button;
+
 mod mapper;
 pub use self::mapper::Mapper;
 
