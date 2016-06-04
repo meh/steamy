@@ -1,3 +1,4 @@
+use std::{u8, i16};
 use std::io::{Read, Seek, SeekFrom};
 use byteorder::{ReadBytesExt, BigEndian, LittleEndian};
 
@@ -103,7 +104,10 @@ impl State {
 				let rpad_x = try!(buffer.read_i16::<LittleEndian>());
 				let rpad_y = try!(buffer.read_i16::<LittleEndian>());
 
-				try!(buffer.seek(SeekFrom::Current(10)));
+				let ltrigp = try!(buffer.read_u16::<LittleEndian>());
+				let rtrigp = try!(buffer.read_u16::<LittleEndian>());
+
+				try!(buffer.seek(SeekFrom::Current(8)));
 
 				let apitch = try!(buffer.read_i16::<LittleEndian>());
 				let ayaw   = try!(buffer.read_i16::<LittleEndian>());
@@ -119,8 +123,19 @@ impl State {
 					buttons: try!(Button::from_bits(buttons).ok_or(Error::InvalidParameter)),
 
 					trigger: Trigger {
-						left:  ltrig as f32 / 255.0,
-						right: rtrig as f32 / 255.0,
+						left: if ltrigp != 0 {
+							ltrigp as f32 / i16::max_value() as f32
+						}
+						else {
+							ltrig as f32 / u8::max_value() as f32
+						},
+
+						right: if rtrigp != 0 {
+							rtrigp as f32 / i16::max_value() as f32
+						}
+						else {
+							rtrig as f32 / u8::max_value() as f32
+						},
 					},
 
 					pad: Pad {
