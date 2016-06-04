@@ -1,14 +1,25 @@
+extern crate clap;
+use clap::{Arg, App};
+
 extern crate steamy_controller as controller;
 
 use std::time::Duration;
-use std::env;
 
 fn main() {
+	let matches = App::new("state")
+		.version("1.0")
+		.author("meh <meh@schizofreni.co>")
+		.about("Dump the controller state.")
+			.arg(Arg::with_name("sensors")
+				.short("S")
+				.long("sensors")
+				.help("Enable the gyroscope and accelerometer."))
+		.get_matches();
+
 	let mut manager    = controller::Manager::new().unwrap();
 	let mut controller = manager.open().unwrap();
-	let sensors        = env::var("SENSORS").unwrap_or(String::from("off")) == "on";
 
-	if sensors {
+	if matches.is_present("sensors") {
 		controller.sensors().on().unwrap();
 	}
 
@@ -29,26 +40,13 @@ fn main() {
 					println!("\tpad: {:?}", pad);
 				}
 
-				if env::var("SENSORS").is_ok() {
+				if matches.is_present("sensors") {
 					println!("\torientation: {:?}", orientation);
 					println!("\tacceleration: {:?}", acceleration);
 				}
 
 				println!("}}");
 				println!("");
-			}
-
-			controller::State::Power(state) => {
-				if state {
-					println!("-- ON --");
-
-					if sensors {
-						controller.sensors().on().unwrap();
-					}
-				}
-				else {
-					println!("-- OFF --");
-				}
 			}
 
 			_ => ()
