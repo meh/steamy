@@ -12,19 +12,25 @@ pub struct Details {
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Build {
+	pub revision:   i32,
 	pub bootloader: SystemTime,
 	pub firmware:   SystemTime,
 	pub radio:      SystemTime,
 }
 
 impl Build {
-	pub fn parse<R: Read>(mut buffer: R) -> Res<Build> {
+	pub fn parse<R: Read + Seek>(mut buffer: R) -> Res<Build> {
+		let mut revision   = 0;
 		let mut bootloader = 0;
 		let mut firmware   = 0;
 		let mut radio      = 0;
 
 		while let Ok(key) = buffer.read_u8() {
 			match key {
+				0x09 => {
+					revision = try!(buffer.read_i32::<LittleEndian>());
+				}
+
 				0x0a => {
 					bootloader = try!(buffer.read_i32::<LittleEndian>());
 				}
@@ -38,12 +44,14 @@ impl Build {
 				}
 
 				_ => {
-					try!(buffer.read_i32::<LittleEndian>());
+					try!(buffer.seek(SeekFrom::Current(4)));
 				}
 			}
 		}
 
 		Ok(Build {
+			revision: revision,
+
 			bootloader: UNIX_EPOCH + Duration::from_secs(bootloader as u64),
 			firmware:   UNIX_EPOCH + Duration::from_secs(firmware as u64),
 			radio:      UNIX_EPOCH + Duration::from_secs(radio as u64),
