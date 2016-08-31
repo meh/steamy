@@ -212,6 +212,7 @@ impl<'a> Controller<'a> {
 	pub fn control_with<T, F>(&mut self, id: u8, size: u8, func: F) -> Res<()>
 		where F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>
 	{
+		self.packet.clone_from_slice(&[0; 64][..]);
 		self.packet[0] = id;
 		self.packet[1] = size;
 
@@ -226,6 +227,7 @@ impl<'a> Controller<'a> {
 	pub fn control_with<T, F>(&mut self, func: F) -> Res<()>
 		where F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>
 	{
+		self.packet.clone_from_slice(&[0; 65][..]);
 		self.packet[1] = id;
 		self.packet[2] = size;
 
@@ -245,6 +247,7 @@ impl<'a> Controller<'a> {
 	pub fn request_with<T, F>(&mut self, id: u8, size: u8, func: F) -> Res<&[u8]>
 		where F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>
 	{
+		self.packet.clone_from_slice(&[0; 64][..]);
 		self.packet[0] = id;
 		self.packet[1] = size;
 
@@ -273,6 +276,7 @@ impl<'a> Controller<'a> {
 	pub fn request_with<T, F>(&mut self, id: u8, size: u8, func: F) -> Res<&[u8]>
 		where F: FnOnce(Cursor<&mut [u8]>) -> io::Result<T>
 	{
+		self.packet.clone_from_slice(&[0; 65][..]);
 		self.packet[1] = id;
 		self.packet[2] = size;
 
