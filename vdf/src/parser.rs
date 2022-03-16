@@ -62,6 +62,9 @@ named!(pub open(&[u8]) -> Token,
 named!(pub close(&[u8]) -> Token,
 	value!(Token::GroupEnd, char!('}')));
 
+named!(pub empty_item(&[u8]) -> Token,
+	value!(Token::Item(Cow::Borrowed("")), tag!("\"\"")));
+
 named!(pub bare(&[u8]) -> Token,
 	alt!(bare_statement | bare_item));
 
@@ -74,7 +77,7 @@ named!(bare_item(&[u8]) -> Token,
 		|v| { string(v).map(|v| Token::Item(v)) }));
 
 named!(pub enclosed(&[u8]) -> Token,
-	alt!(enclosed_statement | enclosed_item));
+	alt!(enclosed_statement | enclosed_item | empty_item));
 
 named!(enclosed_content,
 	escaped!(is_not!("\"\\"), '\\', is_a_bytes!(&b"\"n\\"[..])));
@@ -96,6 +99,7 @@ mod tests {
 	fn next() {
 		assert_eq!(super::next(b"test"), Done(&b""[..], Token::Item("test".into())));
 		assert_eq!(super::next(b"\"test\""), Done(&b""[..], Token::Item("test".into())));
+		assert_eq!(super::next(b"\"\""), Done(&b""[..], Token::Item("".into())));
 		assert_eq!(super::next(b"#test"), Done(&b""[..], Token::Statement("test".into())));
 		assert_eq!(super::next(b"\"#test\""), Done(&b""[..], Token::Statement("test".into())));
 		assert_eq!(super::next(b"{"), Done(&b""[..], Token::GroupStart));
